@@ -23,5 +23,4 @@ while robot.step(timestep) != -1:
         data=struct.unpack("c",message)
         receiver.nextPacket()
         print(data)
-
 # Enter here exit cleanup code.

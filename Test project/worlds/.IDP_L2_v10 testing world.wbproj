@@ -7,6 +7,6 @@ centralWidgetVisible: 1
 projectionMode: PERSPECTIVE
 renderingMode: PLAIN
 orthographicViewHeight: 1
-textFiles: 1 "controllers/four_wheels_detect_test/four_wheels_detect_test.py" "controllers/CreepyObserver/CreepyObserver.py"
+textFiles: 0 "controllers/four_wheels_detect_test/four_wheels_detect_test.py" "controllers/CreepyObserver/CreepyObserver.py"
 globalOptionalRendering: CoordinateSystem::LidarRaysPaths::LidarPointClouds::DistanceSensorRays
 consoles: Console:All:All

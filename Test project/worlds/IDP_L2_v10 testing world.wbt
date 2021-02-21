@@ -273,8 +273,11 @@ Robot {
   translation 0 0.84 0
   children [
     Receiver {
+      type "infra-red"
+      channel 1
     }
     Emitter {
+      type "infra-red"
     }
   ]
   name "Creepy Observer"
