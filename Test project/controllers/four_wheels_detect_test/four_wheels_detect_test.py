@@ -47,7 +47,7 @@ blocks = []#format: coord1,coord2,colour,sorted?
 
 
 
-def convert_compass_angle(compass_values):
+def convert_compass_angle(compass_values:list)->float:
     #Returns angle using polar angle system, horizontal axis = 0 rads
     rad = np.pi/2 - np.arctan2(compass_values[0],compass_values[2])
     if rad <=0:
@@ -55,66 +55,83 @@ def convert_compass_angle(compass_values):
     return rad
     
 
-def dist_to_wall(angle,position):
+def dist_to_wall(angle:float,position:list)->float:
+    #Finds what the distance sensor should be reading
     x = position[0]
     z = position[1]
-    #0.01 terms as wall has a thickness
-    wallN = abs((1.2-0.01 - x) / np.sin(angle))
+    wallN = abs((1.2-0.01 - x) / np.sin(angle))#0.01 terms as wall has a thickness
     wallS = abs((-1.2+0.01 - x) / np.sin(angle))
     wallW = abs((-1.2+0.01 - z) / np.cos(angle))
     wallE = abs((+1.2-0.01 - z) / np.cos(angle))
     if (angle>=0 and angle <= np.pi/2):
-        #print("North East")
-        return min([wallN,wallE])
+        return min([wallN,wallE,1.6])
     elif (angle>=np.pi/2 and angle <= np.pi):
-        #print("North West")
-        return min([wallW,wallN])
+        return min([wallW,wallN,1.6])
     if (angle>=np.pi and angle <= 3*np.pi/2):
-        #print("South West")
-        return min([wallS,wallW])
+        return min([wallS,wallW,1.6])
     elif (angle>=3*np.pi/2 and angle <= 2*np.pi):
-        #print("South East")
-        return min([wallE,wallS])
+        return min([wallE,wallS,1.6])
     else:
-          return 1
+        return 1
 
-def get_object_position(position,angle,sensordist):
+def get_object_position(position:list,angle:float,sensordist:float)->list:
+    #Determines the coordinates of the box
     x = position[0]
     z = position[1]
     return [x+sensordist * np.sin(angle),z+sensordist * np.cos(angle)]      
         
-def sensor_to_dist(sensor_value,bot_length):
-    #Uses sensitivity curve to calculate actual distance
+def sensor_to_dist(sensor_value:float,bot_length:float)->float:
+    #Uses sensitivity curve to calculate actual distance, factors in position of sensor
     return (1000-sensor_value)/666.7 + bot_length
     
     
-def what_is_it(position,other_robot_position):
-    #other_robot_position just dummy variable
+def what_is_it(position:list,other_robot_position:list)->str:
+    #Determines if the box is interesting
+    #Need to check if other robot is there or if box already known
     x = position[0]
     z = position[1]
     if (x <= 0.2 and x >= -0.2 and ((z <=0.6 and z >= 0.2) or (z >=-0.6 and z <= -0.2))):
         return "SortedBox"
     else:
         return "NewBox"
-    #need clause for if it is the other robot
-        
-        
-def send_message(message_type,content):
-    #Message in format (type, coord1, coord2, block id, block action)
-    #Messages:
-    #Where are you
-    #I am here
-    #New block scanned
-    #Checking out new block
-    #Block colour confirmed
-    #Taking block back
-    #I am done?
-    pass
-    
-def receive_message():
-    pass
 
-def sort_all_messages():
+        
+        
+def message_encode(message_type:str,content:list)->bytes:
+    #Encodees message in format (type, coord1, coord2, block id, block action)
+    format = "HffH"
+    if message_type == "WhereAreYou":
+        message = struct.pack(format,1,0,0,0)#Just a ping
+    elif message_type == "IAmHere":
+        message = struct.pack(format,2,content[0],content[1],0)#coord1, coord2, Null
+    elif message_type == "NewBlock":
+        message = struct.pack(format,3,content[0],content[1],content[2])#coord1, coord2, ID
+    elif message_type == "BlockRed":
+        message = struct.pack(format,4,0,0,content[0])#Null, Null, ID
+    elif message_type == "BlockGreen":
+        message = struct.pack(format,5,0,0,content[0])#Null, Null, ID
+    elif message_type == "MyBlock":
+        message = struct.pack(format,6,0,0,content[0])#Null, Null, ID
+    return message
+
+    
+def message_decode(message:bytes)->(str,list):
+    #Decodes the message sent
+    data=struct.unpack("HffH",message)
+    if data[0] == 1:
+        return ("WhereAreYou", [])
+    elif data[0] ==2:
+        return ("IAmHere", [data[1],data[2]])
+    elif data[0] ==3:
+        return ("NewBlock", [data[1],data[2],data[3]]) 
+    elif data[0] ==4:
+        return ("BlockRed", [data[3]])
+    elif data[0] ==5:
+        return ("BlockGreen", [data[3]])
+    elif data[0] ==6:
+        return ("MyBlock", [data[3]])
+
+def sort_all_messages():#Might not need
     #When it pings for a location it will want to hear back so all outstanding messages are sorted
     pass
 
@@ -123,22 +140,16 @@ def sort_all_messages():
 while robot.step(TIME_STEP) != -1:
     leftSpeed = -1.0
     rightSpeed = 1.0
-    
-    
-    
-    
+       
     coord3d = gps.getValues()
     coord2d = [coord3d[0],coord3d[2]]
     angle = convert_compass_angle(compass.getValues())
 
-
-
-    
+ 
     walldist =  dist_to_wall(angle,coord2d)
     sensordist = sensor_to_dist(ds[0].getValue(),0.1)
     
-    
-    
+ 
     if sensordist < 1.55 and sensordist<walldist * 0.9:#Need to tune this value so no false positives
         #print("Object found at " + str(angle) + " Sensor dist: "+str(sensordist)+ " Wall dist: " + str(walldist))
         object_position = get_object_position(coord2d,angle,sensordist)
@@ -148,7 +159,7 @@ while robot.step(TIME_STEP) != -1:
             pass
         else:
             #print("New object found at: " + str(object_position))
-            message = struct.pack("b",5)
+            message = struct.pack("HffH",1,7,3,2)
             emitter.send(message)
  
         
@@ -162,5 +173,5 @@ while robot.step(TIME_STEP) != -1:
     wheels[3].setVelocity(rightSpeed)
     
     #print(angle)      
-    #print("Wall dist: " + str(walldist))
-    #print("Sensor dist: " + str(sensordist))
+    print("Wall dist: " + str(walldist))
+    print("Sensor dist: " + str(sensordist))

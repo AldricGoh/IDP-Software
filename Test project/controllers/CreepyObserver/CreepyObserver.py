@@ -20,7 +20,7 @@ while robot.step(timestep) != -1:
     
     if receiver.getQueueLength() > 0:
         message = receiver.getData()
-        data=struct.unpack("c",message)
+        data=struct.unpack("HffH",message)
         receiver.nextPacket()
         print(data)
 # Enter here exit cleanup code.
