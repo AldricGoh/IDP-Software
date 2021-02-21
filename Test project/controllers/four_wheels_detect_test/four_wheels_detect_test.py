@@ -48,12 +48,8 @@ blocks = []#format: coord1,coord2,colour,sorted?
 
 
 def convert_compass_angle(compass_values):
-    #Returns angle with positive X being 0 degrees
+    #Returns angle using polar angle system, horizontal axis = 0 rads
     rad = np.pi/2 - np.arctan2(compass_values[0],compass_values[2])
-    #if rad <= 0:
-        #rad += 2*np.pi
-    
-    #rad+= np.pi/2
     if rad <=0:
         rad += 2*np.pi
     return rad
@@ -62,7 +58,7 @@ def convert_compass_angle(compass_values):
 def dist_to_wall(angle,position):
     x = position[0]
     z = position[1]
-    #0.01 terms as wall has thickness
+    #0.01 terms as wall has a thickness
     wallN = abs((1.2-0.01 - x) / np.sin(angle))
     wallS = abs((-1.2+0.01 - x) / np.sin(angle))
     wallW = abs((-1.2+0.01 - z) / np.cos(angle))
@@ -100,6 +96,7 @@ def what_is_it(position,other_robot_position):
         return "SortedBox"
     else:
         return "NewBox"
+    #need clause for if it is the other robot
         
         
 def send_message(message_type,content):
