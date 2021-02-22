@@ -108,6 +108,10 @@ target {
   translation -0.64 0.03 0
 }
 target {
+  translation -0.64 0.03 0.14
+  name "target(4)"
+}
+target {
   translation 0.06 0.03 0.47
   name "target(1)"
 }

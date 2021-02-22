@@ -5,6 +5,12 @@ import struct
 """
 Setup
 """
+blocks = []#format: [coord1,coord2,colour,sorted?]
+other_robot_coords = [0,0.4]
+current_block = None
+block_hitbox_radius = 0.056
+robot_hitbox_radius = None
+robot_status = "scanning"
 
 TIME_STEP = 64
 robot = Robot()
@@ -16,15 +22,6 @@ for i in range(1):
     ds.append(robot.getDevice(dsNames[i]))
     ds[i].enable(TIME_STEP)
     
-#Enable GPS
-gps = robot.getDevice("gps")
-gps.enable(100)#Sampling period
-
-
-#Enable compass
-compass = robot.getDevice("compass")
-compass.enable(100)#Sampling period
-
 #Wheels
 wheels = []
 wheelsNames = ['wheel1', 'wheel2', 'wheel3', 'wheel4']
@@ -33,18 +30,18 @@ for i in range(4):
     wheels[i].setPosition(float('inf'))
     wheels[i].setVelocity(0.0)
     
+#Enable GPS
+gps = robot.getDevice("gps")
+gps.enable(100)#Sampling period
+#Enable compass
+compass = robot.getDevice("compass")
+compass.enable(100)#Sampling period
 #Emitter Receiver
 emitter = robot.getDevice("emitter")
 receiver = robot.getDevice("receiver")
 emitter.setChannel(1)
 receiver.setChannel(2)
 receiver.enable(100)
-
-
-
-blocks = []#format: coord1,coord2,colour,sorted?
-
-
 
 
 def convert_compass_angle(compass_values:list)->float:
@@ -78,7 +75,7 @@ def get_object_position(position:list,angle:float,sensordist:float)->list:
     #Determines the coordinates of the box
     x = position[0]
     z = position[1]
-    return [x+sensordist * np.sin(angle),z+sensordist * np.cos(angle)]      
+    return [x+(sensordist+0.025) * np.sin(angle),z+(sensordist+0.025) * np.cos(angle)]#Adds to centroid, may need to be tuned     
         
 def sensor_to_dist(sensor_value:float,bot_length:float)->float:
     #Uses sensitivity curve to calculate actual distance, factors in position of sensor
@@ -87,13 +84,26 @@ def sensor_to_dist(sensor_value:float,bot_length:float)->float:
     
 def what_is_it(position:list,other_robot_position:list)->str:
     #Determines if the box is interesting
-    #Need to check if other robot is there or if box already known
     x = position[0]
-    z = position[1]
+    z = position[1]  
+    for block in blocks:
+        if (hitboxcollision(x,z,block[0],block[1],block_hitbox_radius) == True) and (block[3] == "Unsorted"):
+            #print("This is a dupe, ignore it")
+            return "ExistingBox"
+
+    #if hitboxcollision(x,z,other_robot_coords[0],other_robot_coords[1],robot_hitbox_radius) == True:  
     if (x <= 0.2 and x >= -0.2 and ((z <=0.6 and z >= 0.2) or (z >=-0.6 and z <= -0.2))):
         return "SortedBox"
     else:
         return "NewBox"
+        
+        
+def hitboxcollision(x1:float,z1:float,x2:float,z2:float,r2:float)->bool:
+    if (x2-x1)**2+(x2-x1)**2 <= r2:
+        return True
+    else:
+        return False
+    
 
         
         
@@ -105,7 +115,7 @@ def message_encode(message_type:str,content:list)->bytes:
     elif message_type == "IAmHere":
         message = struct.pack(format,2,content[0],content[1],0)#coord1, coord2, Null
     elif message_type == "NewBlock":
-        message = struct.pack(format,3,content[0],content[1],content[2])#coord1, coord2, ID
+        message = struct.pack(format,3,content[0],content[1],0)#coord1, coord2, Null
     elif message_type == "BlockRed":
         message = struct.pack(format,4,0,0,content[0])#Null, Null, ID
     elif message_type == "BlockGreen":
@@ -130,11 +140,44 @@ def message_decode(message:bytes)->(str,list):
         return ("BlockGreen", [data[3]])
     elif data[0] ==6:
         return ("MyBlock", [data[3]])
+    #Might need a block removed
 
 def sort_all_messages():#Might not need
-    #When it pings for a location it will want to hear back so all outstanding messages are sorted
-    pass
+    while receiver.getQueueLength() > 0:
+        message = receiver.getData()
+        message_type,data = message_decode(message)
+        if message_type == "WhereAreYou":
+            pass
+        elif message_type == "IAmHere":
+            other_robot_coords = data
+        elif message_type == "NewBlock":
+            blocks.append([data[0],data[1],"Unknown","Unsorted"])
+        elif message_type == "BlockRed":
+            blocks[data[0]][2] = "red"
+        elif message_type == "BlockGreen":
+            blocks[data[0]][2] = "green"
+        elif message_type == "MyBlock":
+            blocks[data[0]][3] = "Bot2Chope"
+        receiver.nextPacket()
+        #print(blocks)
 
+def scan(sensordist,walldist):
+    if sensordist < 1.55 and sensordist<walldist * 0.9:#Need to tune this value so no false positives
+        #print("Object found at " + str(angle) + " Sensor dist: "+str(sensordist)+ " Wall dist: " + str(walldist))
+        object_position = get_object_position(coord2d,angle,sensordist)
+        status = what_is_it(object_position,1)
+        if status == "NewBox":
+            #print("New object found at: " + str(object_position))
+            #message = struct.pack("HffH",1,7,3,2)
+            blocks.append([object_position[0],object_position[1],"Unknown","Unsorted"])
+
+            message = message_encode("NewBlock",[object_position[0],object_position[1]])
+            emitter.send(message)
+            #message = message_encode("BlockRed",[0])
+            #emitter.send(message)    
+        else:
+            pass
+            
         
 
 while robot.step(TIME_STEP) != -1:
@@ -149,22 +192,26 @@ while robot.step(TIME_STEP) != -1:
     walldist =  dist_to_wall(angle,coord2d)
     sensordist = sensor_to_dist(ds[0].getValue(),0.1)
     
- 
-    if sensordist < 1.55 and sensordist<walldist * 0.9:#Need to tune this value so no false positives
-        #print("Object found at " + str(angle) + " Sensor dist: "+str(sensordist)+ " Wall dist: " + str(walldist))
-        object_position = get_object_position(coord2d,angle,sensordist)
-        status = what_is_it(object_position,1)
-        if status == "SortedBox":
-            #print("This box has already been put away")
-            pass
-        else:
-            #print("New object found at: " + str(object_position))
-            message = struct.pack("HffH",1,7,3,2)
-            emitter.send(message)
+    
+    if robot_status == "scanning":
+        scan(sensordist,walldist)
+    """ 
+    if robot_status == "navigating":
+    #Finds how to drive to a block avoiding end zones
+        pathfindtoblock()
+    if robot_status == "checking": 
+    #Gets close to block and then checks the colour
+    #Does not use previously scanned coordinates
+        check block()
+        
+    if robot_status = "Idle":
+    #selection logic to figure out what to do - also chooses block
+    
+    """
  
         
        
-    
+    sort_all_messages()
     
 
     wheels[0].setVelocity(leftSpeed)
@@ -173,5 +220,5 @@ while robot.step(TIME_STEP) != -1:
     wheels[3].setVelocity(rightSpeed)
     
     #print(angle)      
-    print("Wall dist: " + str(walldist))
-    print("Sensor dist: " + str(sensordist))
+    #print("Wall dist: " + str(walldist))
+    #print("Sensor dist: " + str(sensordist))
