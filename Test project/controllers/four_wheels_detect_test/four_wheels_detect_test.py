@@ -167,22 +167,17 @@ def scan(sensordist,walldist):
         object_position = get_object_position(coord2d,angle,sensordist)
         status = what_is_it(object_position,1)
         if status == "NewBox":
-            #print("New object found at: " + str(object_position))
-            #message = struct.pack("HffH",1,7,3,2)
             blocks.append([object_position[0],object_position[1],"Unknown","Unsorted"])
-
             message = message_encode("NewBlock",[object_position[0],object_position[1]])
             emitter.send(message)
-            #message = message_encode("BlockRed",[0])
-            #emitter.send(message)    
+ 
         else:
             pass
             
         
 
 while robot.step(TIME_STEP) != -1:
-    leftSpeed = -1.0
-    rightSpeed = 1.0
+    
        
     coord3d = gps.getValues()
     coord2d = [coord3d[0],coord3d[2]]
@@ -192,6 +187,8 @@ while robot.step(TIME_STEP) != -1:
     walldist =  dist_to_wall(angle,coord2d)
     sensordist = sensor_to_dist(ds[0].getValue(),0.1)
     
+    leftSpeed = -1.0
+    rightSpeed = 1.0
     
     if robot_status == "scanning":
         scan(sensordist,walldist)
