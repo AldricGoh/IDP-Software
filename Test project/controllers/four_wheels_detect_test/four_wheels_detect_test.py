@@ -2,6 +2,7 @@ from controller import Robot,GPS,Compass,Receiver,Emitter
 import numpy as np
 import struct
 
+
 """
 Setup
 """
@@ -10,7 +11,8 @@ other_robot_coords = [0,0.4]
 current_block = None
 block_hitbox_radius = 0.056
 robot_hitbox_radius = None
-robot_status = "scanning"
+robot_status = "navigating"
+destination = [0.5,0.5]
 
 TIME_STEP = 64
 robot = Robot()
@@ -156,8 +158,12 @@ def sort_all_messages():#Might not need
             blocks[data[0]][2] = "red"
         elif message_type == "BlockGreen":
             blocks[data[0]][2] = "green"
-        elif message_type == "MyBlock":
+        elif message_type == "MyBlock":#Choping block means that it will be the next waypoint
+            for item in blocks:
+                if  item[3] == "Bot2Chope":
+                    item[3] == "Unsorted"
             blocks[data[0]][3] = "Bot2Chope"
+            #Also unchope other blocks
         receiver.nextPacket()
         #print(blocks)
 
@@ -177,26 +183,56 @@ def scan(sensordist,walldist):
         
 
 while robot.step(TIME_STEP) != -1:
-    
+    leftSpeed = -1.0
+    rightSpeed = 1.0
        
     coord3d = gps.getValues()
     coord2d = [coord3d[0],coord3d[2]]
+
     angle = convert_compass_angle(compass.getValues())
 
  
     walldist =  dist_to_wall(angle,coord2d)
     sensordist = sensor_to_dist(ds[0].getValue(),0.1)
     
-    leftSpeed = -1.0
-    rightSpeed = 1.0
+    
+    scan(sensordist,walldist)
     
     if robot_status == "scanning":
-        scan(sensordist,walldist)
-    """ 
+        leftSpeed = -1.0
+        rightSpeed = 1.0
+        
+    
     if robot_status == "navigating":
-    #Finds how to drive to a block avoiding end zones
-        pathfindtoblock()
-    if robot_status == "checking": 
+        theta_destination = -np.pi/2-np.arctan2(coord2d[1]-destination[1],coord2d[0]-destination[0])
+        if theta_destination <=0:
+            theta_destination += 2*np.pi
+
+        test_angle = angle
+        print(theta_destination)
+        print(test_angle)
+        
+        if test_angle < theta_destination:
+            test_angle+=np.pi*2
+        if abs(theta_destination - angle) < 0.1:
+            leftSpeed = 3.0
+            rightSpeed = 3.0
+        elif  (test_angle - theta_destination) > np.pi:
+            print("Turning Left")
+            leftSpeed = -1.0
+            rightSpeed = 1.0
+        elif (test_angle - theta_destination) <= np.pi:
+            print("Turning right")
+            leftSpeed = 1.0
+            rightSpeed = -1.0
+        
+        #Need to tune this so that it gets closer/further
+        if hitboxcollision(coord2d[0],coord2d[1],destination[0],destination[1],0.2):
+            robot_status = "checking"
+
+        
+    
+    """if robot_status == "checking": 
     #Gets close to block and then checks the colour
     #Does not use previously scanned coordinates
         check block()
