@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2021-02-22T10:12:03.585Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36" etag="yp8VJaORkNVCkg8V0sIY" version="14.4.2" type="github">
+<mxfile host="app.diagrams.net" modified="2021-02-24T15:44:34.882Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36 OPR/74.0.3911.107" etag="QP7Q11n0ip8zpL0QHbdl" version="14.4.2" type="github">
   <diagram id="C5RBs43oDa-KdzZeNtuy" name="Page-1">
-    <mxGraphModel dx="1221" dy="682" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="902" dy="615" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="WIyWlLk6GJQsqaUBKTNV-0" />
         <mxCell id="WIyWlLk6GJQsqaUBKTNV-1" parent="WIyWlLk6GJQsqaUBKTNV-0" />
@@ -270,11 +270,11 @@
         </mxCell>
         <UserObject label="Sensors needed:&lt;br&gt;&lt;span style=&quot;font-weight: normal&quot;&gt;- Distance x2&lt;br&gt;- Colour&lt;br&gt;- GPS &lt;br&gt;- Compass&lt;br&gt;- Emitter and reciever&lt;br&gt;&lt;br&gt;BASICALLY ALL&lt;/span&gt;" lucidchartObjectId=".mSd3MZpU50T" id="dJJlxQguygPkiteVMr8E-48">
           <mxCell style="html=1;overflow=block;blockSpacing=1;whiteSpace=wrap;shadow=1;whiteSpace=wrap;fontSize=14;fontStyle=1;align=left;spacing=3.8;verticalAlign=top;strokeColor=none;fillColor=#FFECA9;strokeWidth=0;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
-            <mxGeometry x="40" y="49" width="170" height="161" as="geometry" />
+            <mxGeometry x="1100" y="950" width="170" height="161" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="Have you heard of any cubes from other bot" lucidchartObjectId="7oSd.9Ylkt6g" id="dJJlxQguygPkiteVMr8E-49">
-          <mxCell style="html=1;overflow=block;blockSpacing=1;whiteSpace=wrap;rhombus;whiteSpace=wrap;fontSize=8;fontColor=#333333;align=center;spacing=3.8;strokeColor=#333333;strokeOpacity=100;fillOpacity=100;rounded=1;absoluteArcSize=1;arcSize=12;fillColor=#ffffff;strokeWidth=0.8;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxCell style="html=1;overflow=block;blockSpacing=1;whiteSpace=wrap;rhombus;whiteSpace=wrap;fontSize=9;fontColor=#333333;align=center;spacing=3.8;strokeColor=#333333;strokeOpacity=100;fillOpacity=100;rounded=1;absoluteArcSize=1;arcSize=12;fillColor=#ffffff;strokeWidth=0.8;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
             <mxGeometry x="106" y="542.25" width="110" height="86" as="geometry" />
           </mxCell>
         </UserObject>
@@ -412,9 +412,42 @@
         </mxCell>
         <UserObject label="Introduce extra step to make list of locations with cubes first, before realigning and collecting the cubes?" lucidchartObjectId=".mSd3MZpU50T" id="ntFDfBzz1lLIlntSj7zR-10">
           <mxCell style="html=1;overflow=block;blockSpacing=1;whiteSpace=wrap;shadow=1;whiteSpace=wrap;fontSize=14;fontStyle=1;align=left;spacing=3.8;verticalAlign=top;strokeColor=none;fillColor=#FFECA9;strokeWidth=0;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
-            <mxGeometry x="668" y="772" width="170" height="161" as="geometry" />
+            <mxGeometry x="880" y="950" width="170" height="161" as="geometry" />
           </mxCell>
         </UserObject>
+        <mxCell id="vjeDCIvg2DPkSIRzeTyn-0" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="2720" y="720" width="480" height="480" as="geometry" />
+        </mxCell>
+        <mxCell id="vjeDCIvg2DPkSIRzeTyn-1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="2840" y="920" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="vjeDCIvg2DPkSIRzeTyn-2" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="3000" y="920" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="vjeDCIvg2DPkSIRzeTyn-3" value="&lt;font style=&quot;font-size: 48px&quot;&gt;A&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=#ffffff;fillColor=none;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="2720" y="720" width="480" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="vjeDCIvg2DPkSIRzeTyn-4" value="&lt;span style=&quot;font-size: 48px&quot;&gt;C&lt;/span&gt;" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=#ffffff;fillColor=none;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="2720" y="1000" width="480" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="vjeDCIvg2DPkSIRzeTyn-6" value="&lt;span style=&quot;font-size: 48px&quot;&gt;D&lt;/span&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;gradientColor=#ffffff;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="2720" y="720" width="120" height="480" as="geometry" />
+        </mxCell>
+        <mxCell id="vjeDCIvg2DPkSIRzeTyn-7" value="&lt;span style=&quot;font-size: 48px&quot;&gt;B&lt;/span&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;gradientColor=#ffffff;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="3080" y="720" width="120" height="480" as="geometry" />
+        </mxCell>
+        <mxCell id="vjeDCIvg2DPkSIRzeTyn-9" value="&lt;span style=&quot;font-size: 48px&quot;&gt;A/B&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="3120" y="810" width="50" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="vjeDCIvg2DPkSIRzeTyn-10" value="&lt;span style=&quot;font-size: 48px&quot;&gt;B/C&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="3115" y="1091" width="50" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="vjeDCIvg2DPkSIRzeTyn-11" value="&lt;span style=&quot;font-size: 48px&quot;&gt;C/D&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="2760" y="1091" width="50" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="vjeDCIvg2DPkSIRzeTyn-12" value="&lt;span style=&quot;font-size: 48px&quot;&gt;D/A&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="2760" y="810" width="50" height="20" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
