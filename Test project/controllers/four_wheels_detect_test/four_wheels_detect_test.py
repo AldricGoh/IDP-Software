@@ -11,7 +11,7 @@ other_robot_coords = [0,0.4]
 current_block = None
 block_hitbox_radius = 0.056
 robot_hitbox_radius = None
-robot_status = "navigating"
+robot_status = "scanning"
 destination = [0.5,0.5]
 
 TIME_STEP = 64
@@ -81,7 +81,17 @@ def get_object_position(position:list,angle:float,sensordist:float)->list:
         
 def sensor_to_dist(sensor_value:float,bot_length:float)->float:
     #Uses sensitivity curve to calculate actual distance, factors in position of sensor
-    return (1000-sensor_value)/666.7 + bot_length
+    #return (1000-sensor_value)/666.7 + bot_length
+    
+    #Linear interpolation bewteen 2 points
+    lookup = [0.15,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.3,1.5]
+    lookup2 = [2.75,2.51,1.99,1.52,1.25,1.04,0.87,0.79,0.74,0.69,0.6,0.55,0.5,0.47,0.45]
+    if sensor_value <= 0.45:
+        return 1.5 + bot_length
+    index = [ n for n,i in enumerate(lookup2) if i<sensor_value ][0] - 1
+    return (sensor_value - lookup2[index]) / (lookup2[index+1] - lookup2[index]) * (lookup[index+1] - lookup[index]) + lookup[index] + bot_length
+
+    
     
     
 def what_is_it(position:list,other_robot_position:list)->str:
@@ -215,14 +225,14 @@ while robot.step(TIME_STEP) != -1:
         if test_angle < theta_destination:
             test_angle+=np.pi*2
         if abs(theta_destination - angle) < 0.1:
-            leftSpeed = 3.0
-            rightSpeed = 3.0
+            leftSpeed = 5.0
+            rightSpeed = 5.0
         elif  (test_angle - theta_destination) > np.pi:
-            print("Turning Left")
+            #print("Turning Left")
             leftSpeed = -1.0
             rightSpeed = 1.0
         elif (test_angle - theta_destination) <= np.pi:
-            print("Turning right")
+            #print("Turning right")
             leftSpeed = 1.0
             rightSpeed = -1.0
         
@@ -253,5 +263,5 @@ while robot.step(TIME_STEP) != -1:
     wheels[3].setVelocity(rightSpeed)
     
     #print(angle)      
-    #print("Wall dist: " + str(walldist))
-    #print("Sensor dist: " + str(sensordist))
+    print("Wall dist: " + str(walldist))
+    print("Sensor dist: " + str(sensordist))
