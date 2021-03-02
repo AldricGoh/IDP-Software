@@ -263,5 +263,5 @@ while robot.step(TIME_STEP) != -1:
     wheels[3].setVelocity(rightSpeed)
     
     #print(angle)      
-    print("Wall dist: " + str(walldist))
-    print("Sensor dist: " + str(sensordist))
+    #print("Wall dist: " + str(walldist))
+    #print("Sensor dist: " + str(sensordist))

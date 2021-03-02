@@ -5,7 +5,8 @@ PROTO IDP_robot [
   ]
   {
     Robot {
-  translation 0 0.06 0
+  translation IS translation
+  rotation IS rotation
   children [
     LightSensor {
       translation 0.18375 0.049 0

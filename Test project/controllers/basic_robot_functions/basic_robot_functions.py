@@ -1,4 +1,7 @@
-from controller import Robot, Motor
+from controller import Robot, Motor, Keyboard
+
+
+
 
  
 
@@ -69,7 +72,7 @@ def closeDoor():
     right_door.setPosition(0)
 
 move(0.5)
-
+openDoor()
 while robot.step(timestep) != -1:
     #read sensors
     ds_right_value = ds_right.getValue()
@@ -80,6 +83,8 @@ while robot.step(timestep) != -1:
         move(0.5)
     ls_red_value = ls_red.getValue()
     ls_green_value = ls_green.getValue()
+    key=keyboard.getKey()
+
     
     #print sensor values
     #print("Right = ", ds_right_value,"Left = ", ds_left_value)
