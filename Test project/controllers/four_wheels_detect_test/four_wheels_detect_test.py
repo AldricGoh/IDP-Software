@@ -99,7 +99,7 @@ def what_is_it(position:list,other_robot_position:list)->str:
     x = position[0]
     z = position[1]  
     for block in blocks:
-        if (hitboxcollision(x,z,block[0],block[1],block_hitbox_radius) == True) and (block[3] == "Unsorted"):
+        if (hitboxcollision(x,z,block[0],block[1],block_hitbox_radius) == True) and (block[3] != "Sorted"):
             #print("This is a dupe, ignore it")
             return "ExistingBox"
 
