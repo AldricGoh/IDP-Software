@@ -1,8 +1,12 @@
-PROTO robot [
-
+PROTO IDP_robot [
+    field SFVec3f    translation  0 0 0
+    field SFRotation rotation     0 1 0 0
+    field SFColor colour 1 0 0 
   ]
   {
     Robot {
+      translation IS translation
+      rotation IS rotation
   translation 0 0.1 0
   children [
     DEF BODY Group {
