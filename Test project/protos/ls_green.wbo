@@ -1,0 +1,12 @@
+#VRML_OBJ R2021a utf8
+LightSensor {
+  translation 0.18375 0.049 0
+  rotation 0 0 1 -1.5707996938995747
+  name "ls_green"
+  lookupTable [
+    0 0 0
+    0.39 0 0
+    0.4 5 0
+  ]
+  colorFilter 0 1 0
+}

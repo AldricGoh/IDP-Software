@@ -5,10 +5,30 @@ PROTO IDP_robot [
   ]
   {
     Robot {
-      translation IS translation
-      rotation IS rotation
-  translation 0 0.1 0
+  translation 0 0.06 0
   children [
+    LightSensor {
+      translation 0.18375 0.049 0
+      rotation 0 0 1 -1.5707996938995747
+      name "ls_green"
+      lookupTable [
+        0 0 0
+        0.39 0 0
+        0.4 5 0
+      ]
+      colorFilter 0 1 0
+    }
+    LightSensor {
+      translation 0.18375 0.049 0
+      rotation 0 0 1 -1.5707996938995747
+      name "ls_red"
+      lookupTable [
+        0 0 0
+        0.39 0 0
+        0.4 5 0
+      ]
+      colorFilter 1 0 0
+    }
     DEF BODY Group {
       children [
         Transform {
@@ -364,6 +384,6 @@ PROTO IDP_robot [
   physics Physics {
     density 700
   }
-  controller "test"
+  controller "basic_robot_functions"
 }
   }
