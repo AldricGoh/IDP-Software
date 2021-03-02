@@ -176,7 +176,7 @@ PROTO IDP_robot [
       ]
     }
     DistanceSensor {
-      translation 0.096 0 0.12
+      translation 0.096 -0.03 0.12
       name "ds_long"
       model "SHARP long distance sensor 20-150cm"
       lookupTable [
@@ -198,7 +198,7 @@ PROTO IDP_robot [
       ]
     }
     DistanceSensor {
-      translation 0.096 0 -0.12
+      translation 0.096 -0.03 -0.12
       name "ds_short"
       model "SHARP short distance sensor 10-80cm"
       lookupTable [
