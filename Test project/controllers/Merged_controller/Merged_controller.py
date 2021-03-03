@@ -13,25 +13,36 @@ block_hitbox_radius = 0.056
 robot_hitbox_radius = None
 robot_status = "scanning"
 destination = [0.5,0.5]
+MAX_SPEED = 3.14
+sensorX = 0.096
+sensorZ = 0.12
 
 TIME_STEP = 64
 robot = Robot()
 
-#Sensors
-ds = []
-dsNames = ['ds_front']
-for i in range(1):
-    ds.append(robot.getDevice(dsNames[i]))
-    ds[i].enable(TIME_STEP)
     
-#Wheels
-wheels = []
-wheelsNames = ['wheel1', 'wheel2', 'wheel3', 'wheel4']
-for i in range(4):
-    wheels.append(robot.getDevice(wheelsNames[i]))
-    wheels[i].setPosition(float('inf'))
-    wheels[i].setVelocity(0.0)
+#get robot motor devices
+left_wheel = robot.getDevice("left_wheel")
+right_wheel = robot.getDevice("right_wheel")
+left_door = robot.getDevice("left_door")
+right_door = robot.getDevice("right_door")
+
+
+left_wheel.setVelocity(MAX_SPEED)
+right_wheel.setVelocity(MAX_SPEED)
     
+#get robot sensor devices
+ds_right = robot.getDevice('ds_long')
+ds_left= robot.getDevice('ds_short')
+ls_red = robot.getDevice('ls_red')
+ls_green = robot.getDevice('ls_green')
+
+#enable sensors
+ds_right.enable(TIME_STEP)
+ds_left.enable(TIME_STEP)
+ls_red.enable(TIME_STEP) 
+ls_green.enable(TIME_STEP)
+
 #Enable GPS
 gps = robot.getDevice("gps")
 gps.enable(100)#Sampling period
@@ -46,6 +57,25 @@ receiver.setChannel(2)
 receiver.enable(100)
 
 
+timestep = int(robot.getBasicTimeStep())
+
+def openDoor():
+    left_door.setPosition(1.57)
+    right_door.setPosition(1.57)
+
+    
+def closeDoor():
+    left_door.setPosition(0)
+    right_door.setPosition(0)
+    
+    
+def setSpeed(speedL,speedR):
+    
+    left_wheel.setPosition(float('inf'))
+    right_wheel.setPosition(float('inf'))
+    left_wheel.setVelocity(speedL*MAX_SPEED)
+    right_wheel.setVelocity(speedR*MAX_SPEED)
+
 def convert_compass_angle(compass_values:list)->float:
     #Returns angle using polar angle system, horizontal axis = 0 rads
     rad = np.pi/2 - np.arctan2(compass_values[0],compass_values[2])
@@ -54,24 +84,30 @@ def convert_compass_angle(compass_values:list)->float:
     return rad
     
 
-def dist_to_wall(angle:float,position:list)->float:
+def dist_to_wall(angle:float,position:list,sensor_type)->float:
     #Finds what the distance sensor should be reading
+    
+    if sensor_type == "left":
+        cap = 0.8
+    else:
+        cap = 1.5
     x = position[0]
     z = position[1]
+    print("X: " + str(x) + " Z: " + str(z))
     wallN = abs((1.2-0.01 - x) / np.sin(angle))#0.01 terms as wall has a thickness
     wallS = abs((-1.2+0.01 - x) / np.sin(angle))
     wallW = abs((-1.2+0.01 - z) / np.cos(angle))
     wallE = abs((+1.2-0.01 - z) / np.cos(angle))
     if (angle>=0 and angle <= np.pi/2):
-        return min([wallN,wallE,1.6])
+        return min([wallN,wallE,cap])
     elif (angle>=np.pi/2 and angle <= np.pi):
-        return min([wallW,wallN,1.6])
+        return min([wallW,wallN,cap])
     if (angle>=np.pi and angle <= 3*np.pi/2):
-        return min([wallS,wallW,1.6])
+        return min([wallS,wallW,cap])
     elif (angle>=3*np.pi/2 and angle <= 2*np.pi):
-        return min([wallE,wallS,1.6])
+        return min([wallE,wallS,cap])
     else:
-        return 1
+        return 0.1
 
 def get_object_position(position:list,angle:float,sensordist:float)->list:
     #Determines the coordinates of the box
@@ -79,19 +115,28 @@ def get_object_position(position:list,angle:float,sensordist:float)->list:
     z = position[1]
     return [x+(sensordist+0.025) * np.sin(angle),z+(sensordist+0.025) * np.cos(angle)]#Adds to centroid, may need to be tuned     
         
-def sensor_to_dist(sensor_value:float,bot_length:float)->float:
+def sensor_to_dist(sensor_value:float,bot_length:float,sensor_type)->float:
     #Uses sensitivity curve to calculate actual distance, factors in position of sensor
     #return (1000-sensor_value)/666.7 + bot_length
     
     #Linear interpolation bewteen 2 points
-    lookup = [0.15,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.3,1.5]
-    lookup2 = [2.75,2.51,1.99,1.52,1.25,1.04,0.87,0.79,0.74,0.69,0.6,0.55,0.5,0.47,0.45]
-    if sensor_value <= 0.45:
-        return 1.5 + bot_length
-    index = [ n for n,i in enumerate(lookup2) if i<sensor_value ][0] - 1
-    return (sensor_value - lookup2[index]) / (lookup2[index+1] - lookup2[index]) * (lookup[index+1] - lookup[index]) + lookup[index] + bot_length
-
+    print("Value used: " +str(sensor_value))
+    if sensor_type == "right":
+        lookup = [0.15,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5]
+        lookup2 = [2.75,2.51,1.99,1.52,1.25,1.04,0.87,0.79,0.74,0.69,0.6,0.55,0.5,0.47,0.45]
+        if sensor_value <= 0.45:
+            return 1.5 #+ bot_length
+        index = [ n for n,i in enumerate(lookup2) if i<sensor_value ][0] - 1
+        return (sensor_value - lookup2[index]) / (lookup2[index+1] - lookup2[index]) * (lookup[index+1] - lookup[index]) + lookup[index] #+ bot_length
+    else:
+        lookup = [0.05,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8]
+        lookup2 = [3.1,2.26,1.27,0.92,0.75,0.6,0.5,0.45,0.41]
+        if sensor_value <= 0.41:
+            return 0.8 #+ bot_length
+        index = [ n for n,i in enumerate(lookup2) if i<sensor_value ][0] - 1
+        return (sensor_value - lookup2[index]) / (lookup2[index+1] - lookup2[index]) * (lookup[index+1] - lookup[index]) + lookup[index] #+ bot_length
     
+        
     
     
 def what_is_it(position:list,other_robot_position:list)->str:
@@ -193,8 +238,8 @@ def scan(sensordist,walldist):
         
 
 while robot.step(TIME_STEP) != -1:
-    leftSpeed = -1.0
-    rightSpeed = 1.0
+    leftSpeed = -0.4
+    rightSpeed = 0.4
        
     coord3d = gps.getValues()
     coord2d = [coord3d[0],coord3d[2]]
@@ -202,15 +247,24 @@ while robot.step(TIME_STEP) != -1:
     angle = convert_compass_angle(compass.getValues())
 
  
-    walldist =  dist_to_wall(angle,coord2d)
-    sensordist = sensor_to_dist(ds[0].getValue(),0.1)
+    #Need to format the coordiante right
+    #coordtemp = [coord2d[0]-np.sin(angle) * sensorZ + np.cos(angle) * sensorX,coord2d[1]-np.cos(angle) * sensorZ - np.sin(angle) * sensorX]
+    #walldistL =  dist_to_wall(angle,coordtemp,"left")
+    #sensordistL = sensor_to_dist(ds_left.getValue(),sensorX,"left")
     
     
-    scan(sensordist,walldist)
+    
+    coordtemp = [coord2d[0]+np.sin(angle) * sensorZ + np.cos(angle) * sensorX,coord2d[1]+np.cos(angle) * sensorZ - np.sin(angle) * sensorX]
+    walldistR =  dist_to_wall(angle,coordtemp,"right")
+    sensordistR = sensor_to_dist(ds_right.getValue(),sensorX,"right")
+    print("Predicted: " + str(walldistR))
+    
+    print("Actual :" + str(sensordistR))
+    
+    #scan(sensordist,walldist)
     
     if robot_status == "scanning":
-        leftSpeed = -1.0
-        rightSpeed = 1.0
+        pass
         
     
     if robot_status == "navigating":
@@ -225,8 +279,8 @@ while robot.step(TIME_STEP) != -1:
         if test_angle < theta_destination:
             test_angle+=np.pi*2
         if abs(theta_destination - angle) < 0.1:
-            leftSpeed = 5.0
-            rightSpeed = 5.0
+            leftSpeed = 1.0
+            rightSpeed = 1.0
         elif  (test_angle - theta_destination) > np.pi:
             #print("Turning Left")
             leftSpeed = -1.0
@@ -257,10 +311,7 @@ while robot.step(TIME_STEP) != -1:
     sort_all_messages()
     
 
-    wheels[0].setVelocity(leftSpeed)
-    wheels[1].setVelocity(rightSpeed)
-    wheels[2].setVelocity(leftSpeed)
-    wheels[3].setVelocity(rightSpeed)
+    setSpeed(leftSpeed,rightSpeed)
     
     #print(angle)      
     #print("Wall dist: " + str(walldist))

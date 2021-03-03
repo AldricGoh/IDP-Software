@@ -18,8 +18,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.4767395564990387 0.8703367511742934 0.12342339658458525 0.5712252804530814
-  position 0.6931820873503514 1.119201828191154 3.148480005114149
+  orientation -0.2988206402665276 0.9277126435336509 0.2237308114196785 1.3542140566666487
+  position 1.5417883552543825 0.9495302779500717 0.38561664411731006
 }
 Background {
   skyColor [
@@ -141,6 +141,19 @@ Robot {
 Robot {
   translation 0 0.07 0
   children [
+	Receiver {
+      type "infra-red"
+      channel 2
+    }
+    Emitter {
+      type "infra-red"
+      channel 1
+    }
+    Compass {
+      yAxis FALSE
+    }
+    GPS {
+    }
     LightSensor {
       translation 0.18375 0.049 0
       rotation 0 0 1 -1.5707996938995747
@@ -310,7 +323,7 @@ Robot {
       ]
     }
     DistanceSensor {
-      translation 0.096 0 0.12
+      translation 0.096 -0.03 0.12
       name "ds_long"
       model "SHARP long distance sensor 20-150cm"
       lookupTable [
@@ -332,7 +345,7 @@ Robot {
       ]
     }
     DistanceSensor {
-      translation 0.096 0 -0.12
+      translation 0.096 -0.03 -0.12
       name "ds_short"
       model "SHARP short distance sensor 10-80cm"
       lookupTable [
