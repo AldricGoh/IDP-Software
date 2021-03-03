@@ -78,11 +78,15 @@ def setSpeed(speedL,speedR):
 
 def convert_compass_angle(compass_values:list)->float:
     #Returns angle using polar angle system, horizontal axis = 0 rads
-    rad = np.pi/2 - np.arctan2(compass_values[0],compass_values[2])
+    """rad = np.pi/2 - np.arctan2(compass_values[0],compass_values[2])
+    if rad <=0:
+        rad += 2*np.pi
+    return rad"""
+    
+    rad = -np.pi-np.arctan2(compass_values[0],compass_values[2])
     if rad <=0:
         rad += 2*np.pi
     return rad
-    
 
 def dist_to_wall(angle:float,position:list,sensor_type)->float:
     #Finds what the distance sensor should be reading
@@ -93,7 +97,7 @@ def dist_to_wall(angle:float,position:list,sensor_type)->float:
         cap = 1.5
     x = position[0]
     z = position[1]
-    print("X: " + str(x) + " Z: " + str(z))
+    print("X: " + str(x) + " Z: " + str(z) + " Angle: " + str(angle))
     wallN = abs((1.2-0.01 - x) / np.sin(angle))#0.01 terms as wall has a thickness
     wallS = abs((-1.2+0.01 - x) / np.sin(angle))
     wallW = abs((-1.2+0.01 - z) / np.cos(angle))
@@ -120,7 +124,7 @@ def sensor_to_dist(sensor_value:float,bot_length:float,sensor_type)->float:
     #return (1000-sensor_value)/666.7 + bot_length
     
     #Linear interpolation bewteen 2 points
-    print("Value used: " +str(sensor_value))
+    #print("Value used: " +str(sensor_value))
     if sensor_type == "right":
         lookup = [0.15,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5]
         lookup2 = [2.75,2.51,1.99,1.52,1.25,1.04,0.87,0.79,0.74,0.69,0.6,0.55,0.5,0.47,0.45]
