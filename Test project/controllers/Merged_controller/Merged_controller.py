@@ -97,7 +97,7 @@ def dist_to_wall(angle:float,position:list,sensor_type)->float:
         cap = 1.5
     x = position[0]
     z = position[1]
-    print("X: " + str(x) + " Z: " + str(z) + " Angle: " + str(angle))
+    #print("X: " + str(x) + " Z: " + str(z) + " Angle: " + str(angle))
     wallN = abs((1.2-0.01 - x) / np.sin(angle))#0.01 terms as wall has a thickness
     wallS = abs((-1.2+0.01 - x) / np.sin(angle))
     wallW = abs((-1.2+0.01 - z) / np.cos(angle))
@@ -242,8 +242,8 @@ def scan(sensordist,walldist):
         
 
 while robot.step(TIME_STEP) != -1:
-    leftSpeed = -0.4
-    rightSpeed = 0.4
+    leftSpeed = 0
+    rightSpeed = 0
        
     coord3d = gps.getValues()
     coord2d = [coord3d[0],coord3d[2]]
@@ -258,12 +258,14 @@ while robot.step(TIME_STEP) != -1:
     
     
     
-    coordtemp = [coord2d[0]+np.sin(angle) * sensorZ + np.cos(angle) * sensorX,coord2d[1]+np.cos(angle) * sensorZ - np.sin(angle) * sensorX]
+    coordtemp = [coord2d[0]+np.sin(angle) * sensorZ + np.cos(angle) * sensorX,coord2d[1]-np.cos(angle) * sensorZ + np.sin(angle) * sensorX]#Negated the z
     walldistR =  dist_to_wall(angle,coordtemp,"right")
     sensordistR = sensor_to_dist(ds_right.getValue(),sensorX,"right")
-    print("Predicted: " + str(walldistR))
+    #print("X: " + str(coord2d[0]) + " Z: " + str(coord2d[1]) + " Angle: " + str(angle))
+    #print("X: " + str(coordtemp[0]) + " Z: " + str(coordtemp[1]) + " Angle: " + str(angle))
+    #print("Predicted: " + str(walldistR))
     
-    print("Actual :" + str(sensordistR))
+    #print("Actual :" + str(sensordistR))
     
     #scan(sensordist,walldist)
     
@@ -316,6 +318,10 @@ while robot.step(TIME_STEP) != -1:
     
 
     setSpeed(leftSpeed,rightSpeed)
+    
+    ls_red_value = ls_red.getValue()
+    ls_green_value = ls_green.getValue()
+    print("Red = ", ls_red_value, "Green = ", ls_green_value)
     
     #print(angle)      
     #print("Wall dist: " + str(walldist))
