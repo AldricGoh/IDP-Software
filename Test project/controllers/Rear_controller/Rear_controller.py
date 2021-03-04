@@ -1,21 +1,25 @@
 from controller import Robot,GPS,Compass,Receiver,Emitter
 import numpy as np
 import struct
+import time
 
 
 """
 Setup
 """
+start = time.time()
+
 blocks = []#format: [coord1,coord2,colour,sorted?]
 other_robot_coords = [0,0.4]
 current_block = None
-block_hitbox_radius = 0.056
+block_hitbox_radius = 0.1 #0.056
 robot_hitbox_radius = None
 robot_status = "initial scan"
 destination = [0.5,0.5]
 MAX_SPEED = 3.14
 sensorX = 0.115
 sensorZ = 0
+navigating_status = 0
 
 TIME_STEP = 64
 robot = Robot()
@@ -160,7 +164,7 @@ def what_is_it(position:list,other_robot_position:list)->str:
         
         
 def hitboxcollision(x1:float,z1:float,x2:float,z2:float,r2:float)->bool:
-    if (x2-x1)**2+(x2-x1)**2 <= r2:
+    if (x2-x1)**2+(x2-x1)**2 <= r2**2:
         return True
     else:
         return False
@@ -239,68 +243,98 @@ def scan(sensordist,walldist):
         else:
             pass
             
-        
+def anomalies(sensorLong,sensorShort): 
+    if abs(sensorLong - sensorShort) > 0.1:
+        #print("Long: " + str(sensorLong))
+        #print("Short: " + str(sensorShort))
+        return True
 
 while robot.step(TIME_STEP) != -1:
-    leftSpeed = -0.4
-    rightSpeed = 0.4
+    
        
     coord3d = gps.getValues()
     coord2d = [coord3d[0],coord3d[2]]
 
     angle = convert_compass_angle(compass.getValues())
  
-    #Need to format the coordiante right
-    #coordtemp = [coord2d[0]-np.sin(angle) * sensorZ + np.cos(angle) * sensorX,coord2d[1]-np.cos(angle) * sensorZ - np.sin(angle) * sensorX]
-    #walldistShort =  dist_to_wall(angle,coordtemp,"short")
     
-    
-    
-    #Uncomment this eventually
-    #sensordistShort = sensor_to_dist(ds_left.getValue(),sensorX,"short")
-    
-    
-    
-    #coordtemp = [coord2d[0]+np.sin(angle) * sensorZ + np.cos(angle) * sensorX,coord2d[1]+np.cos(angle) * sensorZ - np.sin(angle) * sensorX]
-    
-    
-    #scan(sensordist,walldist)
     
     if robot_status == "initial scan":
+        leftSpeed = -0.4
+        rightSpeed = 0.4
+        #Scans 360 degrees to find all boxes
         walldistLong =  dist_to_wall(angle,coord2d,"long")
         sensordistLong = sensor_to_dist(ds_right.getValue(),sensorX,"long")
         #print("Predicted: " + str(walldistLong))
         #print("Actual :" + str(sensordistLong))
         scan(sensordistLong,walldistLong)
+        if angle > 3*np.pi/2 and angle < 3*np.pi/2 + 0.1 and time.time() - start >= 2:
+            robot_status = "logic"
+    else:
+        sensordistLong = sensor_to_dist(ds_right.getValue(),sensorX,"long")
+        sensordistShort = sensor_to_dist(ds_left.getValue(),sensorX,"short")
+        if sensordistLong > 0.8 + sensorX:
+            sensordistLong = 0.8 + sensorX
+        anomalies(sensordistLong,sensordistShort)
+
+            
+            
+    if robot_status == "logic":
+        destination = [blocks[0][0],blocks[0][1]]
+        print(destination)
+        robot_status = "navigating"
+        #for block in blocks:
+            
         
     
     if robot_status == "navigating":
-        theta_destination = -np.pi/2-np.arctan2(coord2d[1]-destination[1],coord2d[0]-destination[0])
-        if theta_destination <=0:
-            theta_destination += 2*np.pi
-
-        test_angle = angle
-        print(theta_destination)
-        print(test_angle)
+        #Do this if it is further than 60cm away
+        if navigation_status == 0:
+            theta_destination = -np.pi/2-np.arctan2(coord2d[1]-destination[1],coord2d[0]-destination[0])
+            if theta_destination <=0:
+                theta_destination += 2*np.pi
+    
+            test_angle = angle
+            #print(theta_destination)
+            #print(test_angle)
+            
+            if test_angle < theta_destination:
+                test_angle+=np.pi*2
+            if abs(theta_destination - angle) < 0.05:
+                leftSpeed = -0.5
+                rightSpeed = -0.5
+                if hitboxcollision(coord2d[0],coord2d[1],destination[0],destination[1],0.4):
+                    navigating_status = 1
+            
+            elif  (test_angle - theta_destination) > np.pi:
+                #print("Turning Left")
+                leftSpeed = -1.0
+                rightSpeed = 1.0
+            elif (test_angle - theta_destination) <= np.pi:
+                #print("Turning right")
+                leftSpeed = 1.0
+                rightSpeed = -1.0
+            
+            
+        if navigation_status == 1: 
+            leftSpeed = -0.2
+            rightSpeed = 0.2
+            #print("close approach")
         
-        if test_angle < theta_destination:
-            test_angle+=np.pi*2
-        if abs(theta_destination - angle) < 0.1:
-            leftSpeed = 1.0
-            rightSpeed = 1.0
-        elif  (test_angle - theta_destination) > np.pi:
-            #print("Turning Left")
-            leftSpeed = -1.0
-            rightSpeed = 1.0
-        elif (test_angle - theta_destination) <= np.pi:
-            #print("Turning right")
-            leftSpeed = 1.0
-            rightSpeed = -1.0
-        
-        #Need to tune this so that it gets closer/further
-        if hitboxcollision(coord2d[0],coord2d[1],destination[0],destination[1],0.2):
-            robot_status = "checking"
 
+        
+
+        
+        #Do this if it is less than 40cm away
+        
+        ls_red_value = ls_red.getValue()
+        ls_green_value = ls_green.getValue()
+    
+        if ls_red_value > 0:
+            print("red")
+        
+        if ls_green_value > 0:
+            print("red")
         
     
     """if robot_status == "checking": 
@@ -313,8 +347,22 @@ while robot.step(TIME_STEP) != -1:
     
     """
  
+    ls_red_value = ls_red.getValue()
+    ls_green_value = ls_green.getValue()
+    
+    if ls_red_value > 0:
+        print("red")
         
-       
+    if ls_green_value > 0:
+        print("red")    
+        
+        
+    if robot_status == "end":
+        leftSpeed = 0
+        rightSpeed = 0
+    
+
+    
     sort_all_messages()
     
 

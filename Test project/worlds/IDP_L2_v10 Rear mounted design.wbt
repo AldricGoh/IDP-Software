@@ -30,8 +30,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.35472037379801746 -0.849591781681061 -0.39034249181019903 1.8288454663630713
-  position -1.423975317192975 1.525165851206548 -0.08137641391141154
+  orientation -0.5085733560898761 -0.7426440784702948 -0.4356981916286626 1.715156206085007
+  position -1.8721136701258896 2.797086649543417 0.7904978837511096
 }
 Background {
   skyColor [
@@ -117,13 +117,6 @@ TexturedBackgroundLight {
   texture "empty_office"
 }
 target {
-  translation -0.64 0.03 0
-}
-target {
-  translation -0.64 0.03 0.14
-  name "target(4)"
-}
-target {
   translation 0.06 0.03 0.47
   name "target(1)"
 }
@@ -131,6 +124,16 @@ target {
   translation 0.7 0.03 0
   colour 0 1 0
   name "target(2)"
+}
+target {
+  translation 0.7 0.03 0.41
+  colour 0 1 0
+  name "target(4)"
+}
+target {
+  translation -0.78 0.03 0.41
+  colour 0 1 0
+  name "target(5)"
 }
 target {
   translation -1 0.03 -1.01
