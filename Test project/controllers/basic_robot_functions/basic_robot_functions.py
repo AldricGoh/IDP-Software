@@ -71,22 +71,23 @@ def closeDoor():
     left_door.setPosition(0)
     right_door.setPosition(0)
 
-move(0.5)
-openDoor()
+turn(0.5)
+closeDoor()
+
 while robot.step(timestep) != -1:
     #read sensors
-    ds_right_value = ds_right.getValue()
-    ds_left_value = ds_left.getValue()
-    if ds_left_value > 0.5:
-        move(-0.5)
-    elif ds_left_value < 0.45:
-        move(0.5)
-    ls_red_value = ls_red.getValue()
-    ls_green_value = ls_green.getValue()
-    key=keyboard.getKey()
+    #ds_right_value = ds_right.getValue()
+    #ds_left_value = ds_left.getValue()
+    #if ds_left_value > 0.5:
+    #    move(-0.5)
+    #elif ds_left_value < 0.45:
+    #    move(0.5)
+    #ls_red_value = ls_red.getValue()
+    #ls_green_value = ls_green.getValue()
+    #key=keyboard.getKey()
 
     
     #print sensor values
     #print("Right = ", ds_right_value,"Left = ", ds_left_value)
-    print("Red = ", ls_red_value, "Green = ", ls_green_value)
+    #print("Red = ", ls_red_value, "Green = ", ls_green_value)
     pass
