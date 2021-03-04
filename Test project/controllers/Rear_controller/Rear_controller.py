@@ -81,16 +81,13 @@ def convert_compass_angle(compass_values:list)->float:
         rad += 2*np.pi
     return rad"""
     
-    rad = -np.pi-np.arctan2(compass_values[0],compass_values[2])
+    rad = -np.arctan2(compass_values[0],compass_values[2])
     if rad <=0:
         rad += 2*np.pi
     return rad
 
 def dist_to_wall(angle:float,position:list,sensor_type)->float:
     #Finds what the distance sensor should be reading
-    angle2=angle-np.pi
-    if angle2 <=0:
-        angle2 += np.pi * 2
     
     if sensor_type == "short":
         cap = 0.8
@@ -99,17 +96,17 @@ def dist_to_wall(angle:float,position:list,sensor_type)->float:
     x = position[0]
     z = position[1]
     #print("X: " + str(x) + " Z: " + str(z) + " Angle: " + str(angle))
-    wallN = abs((1.2-0.01 - x) / np.sin(angle2))#0.01 terms as wall has a thickness
-    wallS = abs((-1.2+0.01 - x) / np.sin(angle2))
-    wallW = abs((-1.2+0.01 - z) / np.cos(angle2))
-    wallE = abs((+1.2-0.01 - z) / np.cos(angle2))
-    if (angle2>=0 and angle2 <= np.pi/2):
+    wallN = abs((1.2-0.01 - x) / np.sin(angle))#0.01 terms as wall has a thickness
+    wallS = abs((-1.2+0.01 - x) / np.sin(angle))
+    wallW = abs((-1.2+0.01 - z) / np.cos(angle))
+    wallE = abs((+1.2-0.01 - z) / np.cos(angle))
+    if (angle>=0 and angle <= np.pi/2):
         return min([wallN,wallE,cap])
-    elif (angle2>=np.pi/2 and angle2 <= np.pi):
+    elif (angle>=np.pi/2 and angle <= np.pi):
         return min([wallW,wallN,cap])
-    if (angle2>=np.pi and angle2 <= 3*np.pi/2):
+    if (angle>=np.pi and angle <= 3*np.pi/2):
         return min([wallS,wallW,cap])
-    elif (angle2>=3*np.pi/2 and angle2 <= 2*np.pi):
+    elif (angle>=3*np.pi/2 and angle <= 2*np.pi):
         return min([wallE,wallS,cap])
     else:
         return 0.1
@@ -155,10 +152,10 @@ def what_is_it(position:list,other_robot_position:list)->str:
 
     #if hitboxcollision(x,z,other_robot_coords[0],other_robot_coords[1],robot_hitbox_radius) == True:  
     if (x <= 0.2 and x >= -0.2 and ((z <=0.6 and z >= 0.2) or (z >=-0.6 and z <= -0.2))):
-        
+        print("This box has already been sorted")
         return "SortedBox"
     else:
-        print("X: " + str(x) + "Z: " + str(z))
+        #print("X: " + str(x) + "Z: " + str(z))
         return "NewBox"
         
         
@@ -252,7 +249,6 @@ while robot.step(TIME_STEP) != -1:
     coord2d = [coord3d[0],coord3d[2]]
 
     angle = convert_compass_angle(compass.getValues())
-
  
     #Need to format the coordiante right
     #coordtemp = [coord2d[0]-np.sin(angle) * sensorZ + np.cos(angle) * sensorX,coord2d[1]-np.cos(angle) * sensorZ - np.sin(angle) * sensorX]
