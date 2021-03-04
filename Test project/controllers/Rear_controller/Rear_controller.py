@@ -19,7 +19,7 @@ destination = [0.5,0.5]
 MAX_SPEED = 3.14
 sensorX = 0.115
 sensorZ = 0
-navigating_status = 0
+navigation_status = 0
 
 TIME_STEP = 64
 robot = Robot()
@@ -275,12 +275,13 @@ while robot.step(TIME_STEP) != -1:
         sensordistShort = sensor_to_dist(ds_left.getValue(),sensorX,"short")
         if sensordistLong > 0.8 + sensorX:
             sensordistLong = 0.8 + sensorX
-        anomalies(sensordistLong,sensordistShort)
+        if anomalies(sensordistLong,sensordistShort):
+            scan(sensordistLong,sensordistShort)
 
             
             
     if robot_status == "logic":
-        destination = [blocks[0][0],blocks[0][1]]
+        destination = [blocks[0][0],blocks[0][1],"block"]
         print(destination)
         robot_status = "navigating"
         #for block in blocks:
@@ -303,8 +304,8 @@ while robot.step(TIME_STEP) != -1:
             if abs(theta_destination - angle) < 0.05:
                 leftSpeed = -0.5
                 rightSpeed = -0.5
-                if hitboxcollision(coord2d[0],coord2d[1],destination[0],destination[1],0.4):
-                    navigating_status = 1
+                if hitboxcollision(coord2d[0],coord2d[1],destination[0],destination[1],0.18675):
+                    navigation_status = 1
             
             elif  (test_angle - theta_destination) > np.pi:
                 #print("Turning Left")
@@ -316,9 +317,46 @@ while robot.step(TIME_STEP) != -1:
                 rightSpeed = -1.0
             
             
-        if navigation_status == 1: 
-            leftSpeed = -0.2
-            rightSpeed = 0.2
+        
+        #Rotate until it sees block colour
+        if navigation_status == 1:
+        
+            leftSpeed = -0.1
+            rightSpeed = 0.1
+            ls_red_value = ls_red.getValue()
+            ls_green_value = ls_green.getValue()
+            if ls_red_value > 0:
+                robot_status = "end"
+        
+            if ls_green_value > 0:
+                print("Green found")
+                navigation_status = 2
+                theta_destination = theta_destination -np.pi
+                openDoor()  
+                if theta_destination < 0:
+                    theta_destination += 2 * np.pi
+                
+        #Pick up the block      
+        if navigation_status == 2: 
+            
+            leftSpeed = -0.3
+            rightSpeed = 0.3
+
+            
+            test_angle = angle
+            #print(theta_destination)
+            #print(test_angle)
+            
+            if test_angle < theta_destination:
+                test_angle+=np.pi*2
+            if abs(theta_destination - angle) < 0.05:
+                leftSpeed = 0.5
+                rightSpeed = 0.5
+                
+                
+                
+
+                
             #print("close approach")
         
 
@@ -326,15 +364,9 @@ while robot.step(TIME_STEP) != -1:
 
         
         #Do this if it is less than 40cm away
-        
-        ls_red_value = ls_red.getValue()
-        ls_green_value = ls_green.getValue()
+
     
-        if ls_red_value > 0:
-            print("red")
         
-        if ls_green_value > 0:
-            print("red")
         
     
     """if robot_status == "checking": 
@@ -347,14 +379,14 @@ while robot.step(TIME_STEP) != -1:
     
     """
  
-    ls_red_value = ls_red.getValue()
+    """ls_red_value = ls_red.getValue()
     ls_green_value = ls_green.getValue()
     
     if ls_red_value > 0:
         print("red")
         
     if ls_green_value > 0:
-        print("red")    
+        print("green")  """  
         
         
     if robot_status == "end":
