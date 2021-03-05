@@ -5,10 +5,6 @@ sceneTreePerspectives: 000000ff0000000100000002000000c0000000fa01000000020100000
 maximizedDockId: -1
 centralWidgetVisible: 1
 orthographicViewHeight: 1
-<<<<<<< Updated upstream
-textFiles: 0 "controllers/basic_robot_functions/basic_robot_functions.py" "controllers/Rear_controller/Rear_controller.py" "controllers/CreepyObserver/CreepyObserver.py"
-=======
 textFiles: 0 "controllers/Navigation/Navigation.py"
->>>>>>> Stashed changes
-globalOptionalRendering: LightSensorRays::DistanceSensorRays::CoordinateSystem
+globalOptionalRendering: DistanceSensorRays
 consoles: Console:All:All
