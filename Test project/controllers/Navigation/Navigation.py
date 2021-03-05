@@ -1,9 +1,12 @@
 from controller import Robot, Motor, Keyboard, Compass
 import numpy as np
+import time
 
+start = time.time()
+print(start)
 #Useful constants
 TIME_STEP = 64
-MAX_SPEED = 5
+MAX_SPEED = 3
 
 #ROBOT CONSTANTS
 WHEEL_RADIUS = 5.08
@@ -80,7 +83,14 @@ def checkObstacles():
     #If no, return False
     #If yes, return True
     turnRadian((11*np.pi)/30)
-    
+
 
 while robot.step(timestep) != -1:
+    if time.time() -2 < start:
+        moveToPosition(2)
+    if time.time() -2 > start:
+        turnRadian(1)
+    #if 
+
     pass
+    
