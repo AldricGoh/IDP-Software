@@ -56,13 +56,7 @@ def turn():
     left_wheel.setVelocity(-speed*MAX_SPEED)
     right_wheel.setVelocity(speed*MAX_SPEED)
 
-def openDoor():
-    left_door.setPosition(1.57)
-    right_door.setPosition(1.57)
 
-def closeDoor():
-    left_door.setPosition(0)
-    right_door.setPosition(0)
 
 #Turns anti-clockwise by x radians
 def turnRadian(radians):
@@ -93,7 +87,14 @@ def passive_wait(time):
 def dist(x1:float,z1:float,x2:float,z2:float)->bool:
     return (x2-x1)**2+(x2-x1)**2
 
+def openDoor():
+    left_door.setPosition(1.57)
+    right_door.setPosition(1.57)
 
+def closeDoor():
+    left_door.setPosition(0)
+    right_door.setPosition(0)
+    
 def setSpeed(speedL,speedR):
     
     left_wheel.setPosition(float('inf'))
