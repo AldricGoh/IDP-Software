@@ -20,6 +20,9 @@ MAX_SPEED = 3.14
 sensorX = 0.115
 sensorZ = 0
 navigation_status = 0
+WHEEL_RADIUS = 5.08
+ROBOT_WIDTH = 18 + 2*WHEEL_RADIUS
+TURN_RADIUS = (ROBOT_WIDTH-WHEEL_RADIUS+1.11)/2
 
 TIME_STEP = 64
 robot = Robot()
@@ -60,6 +63,22 @@ receiver.enable(100)
 
 
 timestep = int(robot.getBasicTimeStep())
+
+
+
+def turnRadian(radians):
+
+    position = (radians*TURN_RADIUS)/(WHEEL_RADIUS)
+    print(position)
+    left_wheel.setPosition(-position)
+    right_wheel.setPosition(position)
+    left_wheel.setVelocity(MAX_SPEED)
+    right_wheel.setVelocity(MAX_SPEED)
+
+def moveToPosition(position):
+    #moves wheels to position (in rads)
+    left_wheel.setPosition(position)
+    right_wheel.setPosition(position)
 
 def openDoor():
     left_door.setPosition(1.57)
@@ -169,7 +188,10 @@ def hitboxcollision(x1:float,z1:float,x2:float,z2:float,r2:float)->bool:
     else:
         return False
     
-
+def passive_wait(time):
+    start_time = robot.getTime()
+    while start_time + time > robot.getTime():
+        robot.step(1)
         
         
 def message_encode(message_type:str,content:list)->bytes:
@@ -330,11 +352,27 @@ while robot.step(TIME_STEP) != -1:
         
             if ls_green_value > 0:
                 print("Green found")
-                navigation_status = 2
-                theta_destination = theta_destination -np.pi
+                
+                setSpeed(0.3,0.3)
+                print("Reversing")
                 openDoor()  
-                if theta_destination < 0:
-                    theta_destination += 2 * np.pi
+                passive_wait(1)
+                setSpeed(0,0)
+                turnRadian(np.pi)
+                print("Turning")
+                passive_wait(5)
+                
+                
+                """print("Turning")
+                turnRadian(np.pi)
+                passive_wait(5)
+                print("Collecting")
+                moveToPosition(0.3)
+                passive_wait(5)
+                closeDoor()"""
+                break
+                
+
                 
         #Pick up the block      
         if navigation_status == 2: 

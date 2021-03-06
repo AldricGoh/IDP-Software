@@ -43,6 +43,18 @@ compass.enable(TIME_STEP)
 
 timestep = int(robot.getBasicTimeStep())
 
+def robot_location():
+    coord3d = gps.getValues()
+    coord2d = [coord3d[0],coord3d[2]]
+    return coord2d
+ 
+def convert_compass_angle(compass_values:list)->float:
+
+    rad = -np.arctan2(compass_values[0],compass_values[2])
+    if rad <=0:
+        rad += 2*np.pi
+    return rad
+
 def moveToPosition(position):
     #moves wheels to position (in rads)
     left_wheel.setPosition(position)
@@ -76,6 +88,7 @@ def turnRadian(radians):
     left_wheel.setVelocity(MAX_SPEED)
     right_wheel.setVelocity(MAX_SPEED)
     
+
 def checkObstacles():
     #TURN +-66 degrees about axis of symmetry of robot
     #Scan if there are any obstacles to the location desired
@@ -83,14 +96,32 @@ def checkObstacles():
     #If no, return False
     #If yes, return True
     turnRadian((11*np.pi)/30)
+    
+def passive_wait(time):
+    start_time = robot.getTime()
+    while start_time + time > robot.getTime():
+        print(start_time + time)
+        print(robot.getTime())
+        robot.step(1)
+        
+        
+
 
 
 while robot.step(timestep) != -1:
-    if time.time() -2 < start:
-        moveToPosition(2)
-    if time.time() -2 > start:
-        turnRadian(1)
-    #if 
+    coord3d = gps.getValues()
+    coord2d = [coord3d[0],coord3d[2]]
+
+    angle = convert_compass_angle(compass.getValues())
+    moveToPosition(1)
+    
+    passive_wait(2)
+    
+    turnRadian(2)
+    
+    passive_wait(2)
+    
+    break
 
     pass
     
