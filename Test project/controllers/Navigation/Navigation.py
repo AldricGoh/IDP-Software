@@ -43,6 +43,18 @@ compass.enable(TIME_STEP)
 
 timestep = int(robot.getBasicTimeStep())
 
+def robot_location():
+    coord3d = gps.getValues()
+    coord2d = [coord3d[0],coord3d[2]]
+    return coord2d
+ 
+def convert_compass_angle(compass_values:list)->float:
+
+    rad = -np.arctan2(compass_values[0],compass_values[2])
+    if rad <=0:
+        rad += 2*np.pi
+    return rad
+
 def moveToPosition(position):
     #moves wheels to position (in rads)
     left_wheel.setPosition(position)
@@ -54,7 +66,7 @@ def move(speed):
     left_wheel.setVelocity(speed*MAX_SPEED)
     right_wheel.setVelocity(speed*MAX_SPEED)
 
-def turn():
+def turn(speed):
     left_wheel.setPosition(float('inf'))
     right_wheel.setPosition(float('inf'))
     left_wheel.setVelocity(-speed*MAX_SPEED)
@@ -97,11 +109,10 @@ def passive_wait(time):
         robot.step(1)
         
 while robot.step(timestep) != -1:
-    """if time.time() -2 < start:
-        moveToPosition(2)
-    if time.time() -2 > start:
-        turnRadian(1)"""
-    #if 
+    coord3d = gps.getValues()
+    coord2d = [coord3d[0],coord3d[2]]
+
+    angle = convert_compass_angle(compass.getValues())
     moveToPosition(1)
     
     passive_wait(2)
