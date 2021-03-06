@@ -187,6 +187,10 @@ def hitboxcollision(x1:float,z1:float,x2:float,z2:float,r2:float)->bool:
         return True
     else:
         return False
+        
+def dist(x1:float,z1:float,x2:float,z2:float)->bool:
+    return (x2-x1)**2+(x2-x1)**2
+
     
 def passive_wait(time):
     start_time = robot.getTime()
