@@ -83,14 +83,33 @@ def checkObstacles():
     #If no, return False
     #If yes, return True
     turnRadian((11*np.pi)/30)
+    
+def passive_wait(time):
+    start_time = robot.getTime()
+    while start_time + time > robot.getTime():
+        print(start_time + time)
+        print(robot.getTime())
+        robot.step(1)
+        
+        
+
 
 
 while robot.step(timestep) != -1:
-    if time.time() -2 < start:
+    """if time.time() -2 < start:
         moveToPosition(2)
     if time.time() -2 > start:
-        turnRadian(1)
+        turnRadian(1)"""
     #if 
+    moveToPosition(1)
+    
+    passive_wait(2)
+    
+    turnRadian(2)
+    
+    passive_wait(2)
+    
+    break
 
     pass
     

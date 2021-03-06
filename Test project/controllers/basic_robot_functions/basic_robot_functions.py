@@ -86,6 +86,11 @@ def closeDoor():
 turn(0.5)
 closeDoor()
 
+def passive_wait(time):
+    start_time = wb_robot_get_time()
+    while start_time + time > wb_robot_get_time():
+        step()
+
 while robot.step(timestep) != -1:
     #read sensors
     #ds_right_value = ds_right.getValue()
@@ -97,6 +102,10 @@ while robot.step(timestep) != -1:
     #ls_red_value = ls_red.getValue()
     #ls_green_value = ls_green.getValue()
     #key=keyboard.getKey()
+    moveToPosition(1)
+    passive_wait(200)
+        
+    
 
     
     #print sensor values
