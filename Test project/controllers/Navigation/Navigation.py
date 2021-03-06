@@ -77,13 +77,17 @@ def turnRadian(radians):
     right_wheel.setVelocity(MAX_SPEED)
     
 
-def checkObstacles():
+def checkObstacles(destination):
+    #Destination is coordinates we want to go
     #TURN +-66 degrees about axis of symmetry of robot
     #Scan if there are any obstacles to the location desired
     #Using ds_bottom
     #If no, return False
     #If yes, return True
+    if compass.getValues()
     turnRadian((11*np.pi)/30)
+    if 
+    
     
 def passive_wait(time):
     start_time = robot.getTime()
@@ -92,10 +96,6 @@ def passive_wait(time):
         print(robot.getTime())
         robot.step(1)
         
-        
-
-
-
 while robot.step(timestep) != -1:
     """if time.time() -2 < start:
         moveToPosition(2)
