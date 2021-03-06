@@ -311,6 +311,10 @@ while robot.step(TIME_STEP) != -1:
         
     
     if robot_status == "navigating":
+        pass
+        #This part is all trash
+        
+     """   
         #Do this if it is further than 60cm away
         if navigation_status == 0:
             theta_destination = -np.pi/2-np.arctan2(coord2d[1]-destination[1],coord2d[0]-destination[0])
@@ -363,13 +367,13 @@ while robot.step(TIME_STEP) != -1:
                 passive_wait(5)
                 
                 
-                """print("Turning")
+                print("Turning")
                 turnRadian(np.pi)
                 passive_wait(5)
                 print("Collecting")
                 moveToPosition(0.3)
                 passive_wait(5)
-                closeDoor()"""
+                closeDoor()
                 break
                 
 
@@ -405,7 +409,7 @@ while robot.step(TIME_STEP) != -1:
 
     
         
-        
+    """    
     
     """if robot_status == "checking": 
     #Gets close to block and then checks the colour

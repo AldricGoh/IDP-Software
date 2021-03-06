@@ -41,6 +41,14 @@ ls_red.enable(TIME_STEP)
 ls_green.enable(TIME_STEP)
 compass.enable(TIME_STEP)
 
+#Enable GPS
+gps = robot.getDevice("gps")
+gps.enable(100)#Sampling period
+#Enable compass
+compass = robot.getDevice("compass")
+compass.enable(100)#Sampling period
+#Emitter Receiver
+
 timestep = int(robot.getBasicTimeStep())
 
 def robot_location():
@@ -105,6 +113,7 @@ def passive_wait(time):
         robot.step(1)
         
         
+def
 
 
 
