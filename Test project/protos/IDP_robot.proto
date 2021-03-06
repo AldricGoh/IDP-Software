@@ -9,6 +9,20 @@ PROTO IDP_robot [
       translation IS translation
       rotation IS rotation
       children [
+Receiver {
+      type "infra-red"
+      channel 2
+    }
+    Emitter {
+      type "infra-red"
+      channel 1
+    }
+    Compass {
+      yAxis FALSE
+    }
+    GPS {
+      rotation 0 1 0 -1.5707953071795862
+    }
         DEF BODY Group {
           children [
             Transform {
