@@ -143,6 +143,9 @@ def move_to_coordinate(destination):
         setSpeed(leftSpeed,rightSpeed)       
         robot.step(1)
     
+    
+def pickup_scanned_box():
+    pass
 
 while robot.step(timestep) != -1:
     
