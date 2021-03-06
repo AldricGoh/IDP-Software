@@ -32,14 +32,20 @@ ds_bottom = robot.getDevice('ds_long')
 ds_top= robot.getDevice('ds_short')
 ls_red = robot.getDevice('ls_red')
 ls_green = robot.getDevice('ls_green')
-compass = robot.getDevice('compass')
 
 #enable sensors
 ds_bottom.enable(TIME_STEP)
 ds_top.enable(TIME_STEP)
 ls_red.enable(TIME_STEP) 
 ls_green.enable(TIME_STEP)
-compass.enable(TIME_STEP)
+
+#Enable GPS
+gps = robot.getDevice("gps")
+gps.enable(TIME_STEP)#Sampling period
+#Enable compass
+compass = robot.getDevice("compass")
+compass.enable(TIME_STEP)#Sampling period
+#Emitter Receiver
 
 timestep = int(robot.getBasicTimeStep())
 
@@ -108,6 +114,14 @@ def passive_wait(time):
         print(robot.getTime())
         robot.step(1)
         
+<<<<<<< HEAD
+=======
+        
+def
+
+
+
+>>>>>>> 00cc86eecab6f0ff90878323514a59746d7af50d
 while robot.step(timestep) != -1:
     coord3d = gps.getValues()
     coord2d = [coord3d[0],coord3d[2]]
