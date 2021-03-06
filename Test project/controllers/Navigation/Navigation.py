@@ -54,7 +54,7 @@ def robot_location():
     coord2d = [coord3d[0],coord3d[2]]
     return coord2d
  
-def convert_compass_angle(compass_values:list)->float:
+def convert_compass_angle(compass_values):
 
     rad = -np.arctan2(compass_values[0],compass_values[2])
     if rad <=0:
@@ -102,9 +102,9 @@ def checkObstacles(destination):
     #Using ds_bottom
     #If no, return False
     #If yes, return True
-    if compass.getValues()
+    #if compass.getValues()
     turnRadian((11*np.pi)/30)
-    if 
+    #if 
     
     
 def passive_wait(time):
@@ -114,14 +114,14 @@ def passive_wait(time):
         print(robot.getTime())
         robot.step(1)
         
-<<<<<<< HEAD
-=======
+# <<<<<<< HEAD
+# =======
         
-def
+# def
 
 
 
->>>>>>> 00cc86eecab6f0ff90878323514a59746d7af50d
+# >>>>>>> 00cc86eecab6f0ff90878323514a59746d7af50d
 while robot.step(timestep) != -1:
     coord3d = gps.getValues()
     coord2d = [coord3d[0],coord3d[2]]

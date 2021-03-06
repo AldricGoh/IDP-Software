@@ -32,7 +32,7 @@ def robot_location():
     coord2d = [coord3d[0],coord3d[2]]
     return coord2d
  
-def convert_compass_angle(compass_values:list)->float:
+def convert_compass_angle(compass_values):
 
     rad = -np.arctan2(compass_values[0],compass_values[2])
     if rad <=0:
@@ -90,7 +90,7 @@ def passive_wait(time):
         
         
 """
-def dist(x1:float,z1:float,x2:float,z2:float)->bool:
+def dist(x1,z1,x2,z2):
     return (x2-x1)**2+(x2-x1)**2
 
 
