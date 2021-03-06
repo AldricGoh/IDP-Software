@@ -74,7 +74,7 @@ def move(speed):
     left_wheel.setVelocity(speed*MAX_SPEED)
     right_wheel.setVelocity(speed*MAX_SPEED)
 
-def turn():
+def turn(speed):
     left_wheel.setPosition(float('inf'))
     right_wheel.setPosition(float('inf'))
     left_wheel.setVelocity(-speed*MAX_SPEED)
