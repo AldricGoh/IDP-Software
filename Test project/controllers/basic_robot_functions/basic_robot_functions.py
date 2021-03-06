@@ -82,14 +82,17 @@ def openDoor():
 def closeDoor():
     left_door.setPosition(0)
     right_door.setPosition(0)
+    
 
 turn(0.5)
 closeDoor()
 
 def passive_wait(time):
-    start_time = wb_robot_get_time()
-    while start_time + time > wb_robot_get_time():
-        step()
+    start_time = robot.getTime()
+    while start_time + time > robot.getTime():
+        print(start_time + time)
+        print(robot.getTime())
+        robot.step(1)
 
 while robot.step(timestep) != -1:
     #read sensors

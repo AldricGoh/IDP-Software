@@ -76,6 +76,7 @@ def turnRadian(radians):
     left_wheel.setVelocity(MAX_SPEED)
     right_wheel.setVelocity(MAX_SPEED)
     
+
 def checkObstacles():
     #TURN +-66 degrees about axis of symmetry of robot
     #Scan if there are any obstacles to the location desired
