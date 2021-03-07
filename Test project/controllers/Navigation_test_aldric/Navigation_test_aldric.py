@@ -3,7 +3,7 @@ import numpy as np
 import time
 
 start = time.time()
-print(start)
+print('start')
 #Useful constants
 TIME_STEP = 64
 MAX_SPEED = 3
@@ -70,11 +70,11 @@ def setSpeed(speedL,speedR):
     left_wheel.setVelocity(speedL*MAX_SPEED)
     right_wheel.setVelocity(speedR*MAX_SPEED)
 
-def turn():
+def turn(speed):
     left_wheel.setPosition(float('inf'))
     right_wheel.setPosition(float('inf'))
-    left_wheel.setVelocity(-MAX_SPEED)
-    right_wheel.setVelocity(MAX_SPEED)
+    left_wheel.setVelocity(-speed*MAX_SPEED)
+    right_wheel.setVelocity(speed*MAX_SPEED)
 
 def openDoor():
     left_door.setPosition(1.57)
@@ -104,36 +104,29 @@ def checkObstacles(destination):
     turnRadian((11*np.pi)/30)
     #if 
     
-    
-def passive_wait(time):
-    start_time = robot.getTime()
-    while start_time + time > robot.getTime():
-        print(start_time + time)
-        print(robot.getTime())
-        robot.step(1)
-        
-# <<<<<<< HEAD
-# =======
-        
-# def
+def align(targetValue):
+    print(compassAngle())
+    if compassAngle() < targetValue:
+        while compassAngle() < targetValue:
+            turn(1)
+    elif compassAngle() > targetValue:
+        while compassAngle() > targetValue:
+            turn(-1)
+    elif compassAngle() == targetValue:
+        print('aligned')
+    else:
+        pass
 
+# def passive_wait(time):
+    # start_time = robot.getTime()
+    # while start_time + time > robot.getTime():
+        # print(start_time + time)
+        # print(robot.getTime())
+        # robot.step(1)
 
-
-# >>>>>>> 00cc86eecab6f0ff90878323514a59746d7af50d
 while robot.step(timestep) != -1:
-    coord3d = gps.getValues()
-    coord2d = [coord3d[0],coord3d[2]]
-
-    angle = convert_compass_angle(compass.getValues())
-    moveToPosition(1)
     
-    passive_wait(2)
-    
-    turnRadian(2)
-    
-    passive_wait(2)
-    
-    break
+    align(-2)
 
     pass
     

@@ -5,6 +5,6 @@ sceneTreePerspectives: 000000ff0000000100000002000000c0000000fa01000000020100000
 maximizedDockId: -1
 centralWidgetVisible: 1
 orthographicViewHeight: 1
-textFiles: 1 "controllers/Navigation/Navigation.py" "controllers/Navigation2/Navigation2.py"
+textFiles: 2 "controllers/Navigation/Navigation.py" "controllers/Navigation2/Navigation2.py" "controllers/Navigation_test_aldric/Navigation_test_aldric.py"
 globalOptionalRendering: DistanceSensorRays
 consoles: Console:All:All
