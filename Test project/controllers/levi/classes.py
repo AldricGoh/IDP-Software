@@ -8,6 +8,7 @@ class Status:
         self.scanning = False
         self.moving_to_box = False
         self.moving_to_base = False
+        self.aligning = False
         self.fine_searching = False
         self.collecting = False
         self.turning_speed = 0
@@ -51,6 +52,10 @@ class Status:
     def start_idle(self):
         self.reset()
         self.idle = True
+        
+    def start_moving(self):
+        self.reset()
+        self.moving_to_box = True
         
     def start_scan(self, initial_heading):
         self.reset()
