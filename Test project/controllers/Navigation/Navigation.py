@@ -16,10 +16,9 @@ while robot.step(timestep) != -1:
     
     # passive_wait(2)
     # turnRadian(2)
-    align(-0.01)
     # passive_wait(2)
-    
+    align(0.0)
+
     # break
 
     pass
-    
