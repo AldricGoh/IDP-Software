@@ -99,6 +99,9 @@ def evaluate_scan(dists_top, dists_bottom, angles, positions):
     # Group closeby coordinates together that presumably correcpond to the same box
     return boxes
 
+
+
+# Main code body
 # Pre update robot state
 position, true_heading, dist_bottom, dist_top, colors = update_state()
 
@@ -108,7 +111,7 @@ while(np.isnan(true_heading)):
     position, true_heading, dist_bottom, dist_top, colors = update_state()   
 print("Sensor readings valid")
 
-# Main program
+
 status.start_scan(true_heading)
 #status.turn(0.3)
 
