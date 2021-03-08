@@ -24,12 +24,21 @@ def dist(pos, position):
     z2 = position[1]
     return (x2-x1)**2+(z2-z1)**2
     
+def angle(pos, position):
+    x1 = pos[0]
+    z1 = pos[1]
+    x2 = position[0]
+    z2 = position[1]
+    direction = -np.arctan2(x1-x2,z1-z2)
+    if(direction <= 0):
+        direction += 2*np.pi
+        direction = round(direction, 2)
+        
+    return direction
+
 def closest_box():
     answer = []
     for box in boxes:
-        print(box)
-        print(position)
-        print(dist(box, position))
         if answer == []:
             answer = box
         elif dist(answer, position) > dist(box, position):
@@ -125,6 +134,14 @@ def evaluate_scan():
                boxes.remove(item)
     return confirm_boxes
 
+def align(direction):
+    if true_heading != direction:
+        status.turn((direction-true_heading)/3)
+        robot.step(1)
+    else:
+        print('aligned!')
+        status.start_idle()
+
 # Main code body
 # Pre update robot state
 position, true_heading, dist_bottom, dist_top, colors = update_state()
@@ -147,7 +164,6 @@ while robot.step(timestep) != -1:
             status.start_moving()
             boxes = evaluate_scan()
             print(boxes)
-            print(closest_box())
         else:
             if(dist_bottom < 0.8 and np.abs(dist_bottom-dist_top) > 0.04):
                 print(get_object_position(dist_bottom, true_heading, position))
@@ -157,8 +173,16 @@ while robot.step(timestep) != -1:
             # status.scan.angles.append(true_heading)
             # status.scan.positions.append(position)
     
-    # if status.moving_to_box == True:
-        # print(closest_box())
+    if status.moving_to_box == True:
+        current_target = closest_box()
+        direction = angle(current_target, position)
+        if abs(direction-true_heading) > 0.1: align(direction)
+        else:
+            status.turn(0.3)
+            if dist_bottom < 0.8 and np.abs(dist_bottom-dist_top) > 0.04:
+                print('Aligned')
+                status.start_idle()
+
  
     #print("State: x={:.2f}; y={:.2f}; heading={:.2f}; distance_top={:.6f}; distance_bottom={:.6f}; red={}, green={}".format(position[0], position[1], true_heading/(2*np.pi)*360, dist_top, dist_bottom, colors["red"], colors["green"]))
     pass
