@@ -1,11 +1,10 @@
-from controller import Robot, Motor, Keyboard, Compass
+from controller import Robot, Motor, Keyboard, Compass, GPS
 import numpy as np
 import time
 
-start = time.time()
-print(start)
+print('start')
 #Useful constants
-TIME_STEP = 64
+TIME_STEP = 16
 MAX_SPEED = 3
 
 #ROBOT CONSTANTS
@@ -32,51 +31,52 @@ ds_bottom = robot.getDevice('ds_long')
 ds_top= robot.getDevice('ds_short')
 ls_red = robot.getDevice('ls_red')
 ls_green = robot.getDevice('ls_green')
+gps = robot.getDevice("gps")
+compass = robot.getDevice("compass")
 
 #enable sensors
 ds_bottom.enable(TIME_STEP)
 ds_top.enable(TIME_STEP)
 ls_red.enable(TIME_STEP) 
 ls_green.enable(TIME_STEP)
-
-#Enable GPS
-gps = robot.getDevice("gps")
-gps.enable(TIME_STEP)#Sampling period
-#Enable compass
-compass = robot.getDevice("compass")
-compass.enable(TIME_STEP)#Sampling period
+gps.enable(TIME_STEP)
+compass.enable(TIME_STEP)
 #Emitter Receiver
 
 timestep = int(robot.getBasicTimeStep())
 
-def robot_location():
+def robotLocation():
     coord3d = gps.getValues()
     coord2d = [coord3d[0],coord3d[2]]
     return coord2d
  
-def convert_compass_angle(compass_values):
+def compassAngle():
+    compassValues = compass.getValues()
+    rad = -np.arctan2(compassValues[0],compassValues[2])
+    return round(rad, 2) #+- sign essential
+    
+def dist(x1,z1,x2,z2):
+    return (x2-x1)**2+(x2-x1)**2
 
-    rad = -np.arctan2(compass_values[0],compass_values[2])
-    if rad <=0:
-        rad += 2*np.pi
-    return rad
-
+def observe():
+    left_wheel.setPosition(float('inf'))
+    right_wheel.setPosition(float('inf'))
+    left_wheel.setVelocity(-MAX_SPEED)
+    right_wheel.setVelocity(MAX_SPEED)
+    print(compassAngle())
+    print(ds_bottom.getValue())
+    robot.step(1)
+    
 def moveToPosition(position):
     #moves wheels to position (in rads)
     left_wheel.setPosition(position)
     right_wheel.setPosition(position)
 
-def move(speed):
+def turn():
     left_wheel.setPosition(float('inf'))
     right_wheel.setPosition(float('inf'))
-    left_wheel.setVelocity(speed*MAX_SPEED)
-    right_wheel.setVelocity(speed*MAX_SPEED)
-
-def turn(speed):
-    left_wheel.setPosition(float('inf'))
-    right_wheel.setPosition(float('inf'))
-    left_wheel.setVelocity(-speed*MAX_SPEED)
-    right_wheel.setVelocity(speed*MAX_SPEED)
+    left_wheel.setVelocity(-MAX_SPEED)
+    right_wheel.setVelocity(MAX_SPEED)
 
 def openDoor():
     left_door.setPosition(1.57)
@@ -106,6 +106,13 @@ def checkObstacles(destination):
     turnRadian((11*np.pi)/30)
     #if 
     
+def align(direction):
+    currentAngle = compassAngle()
+    while (currentAngle >= direction+(1e-5)) and (currentAngle <= direction-(1e-5)):
+        turn()
+        print(currentAngle)
+        robot.step(1)
+    print('aligned')
     
 def passive_wait(time):
     start_time = robot.getTime()
@@ -113,29 +120,20 @@ def passive_wait(time):
         print(start_time + time)
         print(robot.getTime())
         robot.step(1)
-        
-# <<<<<<< HEAD
-# =======
-        
-# def
 
-
-
-# >>>>>>> 00cc86eecab6f0ff90878323514a59746d7af50d
 while robot.step(timestep) != -1:
-    coord3d = gps.getValues()
-    coord2d = [coord3d[0],coord3d[2]]
+    # coord3d = gps.getValues()
+    # coord2d = [coord3d[0],coord3d[2]]
 
-    angle = convert_compass_angle(compass.getValues())
-    moveToPosition(1)
+    # moveToPosition(1)
     
-    passive_wait(2)
+    # passive_wait(2)
+    # turnRadian(2)
+    observe()
     
-    turnRadian(2)
+    # passive_wait(2)
     
-    passive_wait(2)
-    
-    break
+    # break
 
     pass
     
