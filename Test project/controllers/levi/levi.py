@@ -17,6 +17,35 @@ color = None
 
 
 # Functions
+def dist(pos, position):
+    x1 = pos[0]
+    z1 = pos[1]
+    x2 = position[0]
+    z2 = position[1]
+    return (x2-x1)**2+(z2-z1)**2
+    
+def angle(pos, position):
+    x1 = pos[0]
+    z1 = pos[1]
+    x2 = position[0]
+    z2 = position[1]
+    direction = -np.arctan2(x1-x2,z1-z2)
+    if(direction <= 0):
+        direction += 2*np.pi
+        direction = round(direction, 2)
+        
+    return direction
+
+def closest_box():
+    answer = []
+    for box in boxes:
+        if answer == []:
+            answer = box
+        elif dist(answer, position) > dist(box, position):
+            answer = box
+        else: pass
+    return answer
+
 def long_to_ms(reading):
     """Use sensitivity curve to convert distance sensor raw data to m distance"""
     
@@ -58,13 +87,14 @@ def update_state():
     
     # position
     coord3d = gps.getValues()
-    position = [coord3d[0],coord3d[2]]
+    position = [round(coord3d[0], 2),round(coord3d[2], 2)]
     
     # heading (in radians 0-2pi)
     compass_raw = compass.getValues()
     heading = -np.arctan2(compass_raw[0],compass_raw[2])
     if(heading <= 0):
         heading += 2*np.pi
+        heading = round(heading, 2)
     # keep track of revolutions to get true heading that doesnt wrap around   
     spin_direction = np.sign(status.turning_speed)
     if((spin_direction == 1 and (heading < np.pi and status.previous_heading > np.pi)) or (spin_direction == -1 and (heading > np.pi and status.previous_heading < np.pi))):
@@ -88,9 +118,34 @@ def update_state():
     
 
     
+<<<<<<< HEAD
 
 
 
+=======
+def evaluate_scan():
+    confirm_boxes = []
+    # Initial detection runincluding positions for all detections
+    # Group closeby coordinates together that presumably correcpond to the same box
+    for item in boxes:
+       if boxes.count(item) <= 2:
+           boxes.remove(item)
+       else:
+           if confirm_boxes.count(item) == 0:
+               confirm_boxes.append(item)
+               boxes.remove(item)
+           else:
+               boxes.remove(item)
+    return confirm_boxes
+>>>>>>> 8fa7102cecf59e151b8176f4bb600e4538355b7d
+
+def align(direction):
+    if true_heading != direction:
+        status.turn((direction-true_heading)/3)
+        robot.step(1)
+    else:
+        print('aligned!')
+        status.start_idle()
 
 # Main code body
 # Pre update robot state
@@ -115,12 +170,18 @@ while robot.step(timestep) != -1:
     if(status.scanning == True):
         #If scan is done
         if(np.abs(true_heading - status.scan.initial_heading) >= 2*np.pi):
+<<<<<<< HEAD
             boxes = status.scan.evaluate_scan()
+=======
+            status.start_moving()
+            boxes = evaluate_scan()
+>>>>>>> 8fa7102cecf59e151b8176f4bb600e4538355b7d
             print(boxes)
             status.start_idle()
             
         # If scan is still in progress
         else:
+<<<<<<< HEAD
             status.scan.dists_bottom.append(dist_bottom)
             status.scan.dists_top.append(dist_top)
             status.scan.angles.append(true_heading)
@@ -128,6 +189,26 @@ while robot.step(timestep) != -1:
  
  
  
+=======
+            if(dist_bottom < 0.8 and np.abs(dist_bottom-dist_top) > 0.04):
+                print(get_object_position(dist_bottom, true_heading, position))
+                boxes.append(get_object_position(dist_bottom, true_heading, position))
+            # status.scan.dists_bottom.append(dist_bottom)
+            # status.scan.dists_top.append(dist_top)
+            # status.scan.angles.append(true_heading)
+            # status.scan.positions.append(position)
+    
+    if status.moving_to_box == True:
+        current_target = closest_box()
+        direction = angle(current_target, position)
+        if abs(direction-true_heading) > 0.1: align(direction)
+        else:
+            status.turn(0.3)
+            if dist_bottom < 0.8 and np.abs(dist_bottom-dist_top) > 0.04:
+                print('Aligned')
+                status.start_idle()
+
+>>>>>>> 8fa7102cecf59e151b8176f4bb600e4538355b7d
  
     #print("State: x={:.2f}; y={:.2f}; heading={:.2f}; distance_top={:.6f}; distance_bottom={:.6f}; color={}".format(position[0], position[1], true_heading/(2*np.pi)*360, dist_top, dist_bottom, color))
     pass
