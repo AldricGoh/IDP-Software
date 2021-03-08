@@ -115,21 +115,6 @@ def update_state():
         color = None
     
     return position, true_heading, dist_bottom, dist_top, color
-    
-def evaluate_scan():
-    confirm_boxes = []
-    # Initial detection runincluding positions for all detections
-    # Group closeby coordinates together that presumably correcpond to the same box
-    for item in boxes:
-       if boxes.count(item) <= 2:
-           boxes.remove(item)
-       else:
-           if confirm_boxes.count(item) == 0:
-               confirm_boxes.append(item)
-               boxes.remove(item)
-           else:
-               boxes.remove(item)
-    return confirm_boxes
 
 def align(direction):
     if true_heading != direction:
@@ -173,9 +158,6 @@ while robot.step(timestep) != -1:
             status.scan.dists_top.append(dist_top)
             status.scan.angles.append(true_heading)
             status.scan.positions.append(position)
-            if(dist_bottom < 0.8 and np.abs(dist_bottom-dist_top) > 0.04):
-                print(get_object_position(dist_bottom, true_heading, position))
-                boxes.append(get_object_position(dist_bottom, true_heading, position))
     
     if status.aligning == True:
          if status.got_box == False:
