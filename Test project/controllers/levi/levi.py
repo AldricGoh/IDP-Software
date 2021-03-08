@@ -4,7 +4,6 @@ import numpy as np
 from classes import *
 from constants import *
 from setup import *
-from collections import OrderedDict
 
 
 # Variables
@@ -13,8 +12,9 @@ position = [0,0]
 true_heading = 0
 dist_bottom = 0
 dist_top = 0
-boxes = []
-colors = {"red":False, "green":False}
+boxes = None
+color = None
+
 
 # Functions
 def long_to_ms(reading):
@@ -76,64 +76,58 @@ def update_state():
     dist_bottom = long_to_ms(ds_bottom.getValue())
     dist_top = short_to_ms(ds_top.getValue())
     
-    # colors
-    colors["red"] = (ls_red.getValue() >= 2.5)
-    colors["green"] = (ls_green.getValue() >= 2.5)
+    # color
+    if(ls_red.getValue() >= 2.5):
+        color = "red"
+    elif(ls_green.getValue() >= 2.5):
+        color = "green"
+    else:
+        color = None
     
-    return position, true_heading, dist_bottom, dist_top, colors
+    return position, true_heading, dist_bottom, dist_top, color
     
-def get_object_position(dist, angle, robot_position):
-    """Calculate position estimate for object from distance sensor reading and robot orientation and position"""
-    dist = dist + DISTANCE_SENSOR_OFFSET
-    position = [round(robot_position[0] + dist*np.sin(angle), 2),
-                round(robot_position[1] + dist*np.cos(angle), 2)]
-    return position
+
     
-def evaluate_scan():
-    confirm_boxes = []
-    # Initial detection runincluding positions for all detections
-    for item in boxes:
-       if boxes.count(item) <= 2:
-           boxes.remove(item)
-       else:
-           if confirm_boxes.count(item) == 0:
-               confirm_boxes.append(item)
-               boxes.remove(item)
-           else:
-               boxes.remove(item)
-    # Group closeby coordinates together that presumably correcpond to the same box
-    return confirm_boxes
+
+
+
 
 # Main code body
 # Pre update robot state
-position, true_heading, dist_bottom, dist_top, colors = update_state()
+position, true_heading, dist_bottom, dist_top, color = update_state()
 
 # Wait for startup (compass gave some nan value on the first 2-3 timesteps)
 while(np.isnan(true_heading)):
     robot.step(1)
-    position, true_heading, dist_bottom, dist_top, colors = update_state()   
+    position, true_heading, dist_bottom, dist_top, color = update_state()   
 print("Sensor readings valid")
+
 
 status.start_scan(true_heading)
 #status.turn(0.3)
+
 timestep = int(robot.getBasicTimeStep())  
 while robot.step(timestep) != -1:
     # Update robot state
-    position, true_heading, dist_bottom, dist_top, colors = update_state()
+    position, true_heading, dist_bottom, dist_top, color = update_state()
     
+    # If in scanning state
     if(status.scanning == True):
+        #If scan is done
         if(np.abs(true_heading - status.scan.initial_heading) >= 2*np.pi):
-            status.start_idle()
-            boxes = evaluate_scan()
+            boxes = status.scan.evaluate_scan()
             print(boxes)
+            status.start_idle()
+            
+        # If scan is still in progress
         else:
-            if(dist_bottom < 0.8 and np.abs(dist_bottom-dist_top) > 0.04):
-                print(get_object_position(dist_bottom, true_heading, position))
-                boxes.append(get_object_position(dist_bottom, true_heading, position))
-            # status.scan.dists_bottom.append(dist_bottom)
-            # status.scan.dists_top.append(dist_top)
-            # status.scan.angles.append(true_heading)
-            # status.scan.positions.append(position)
+            status.scan.dists_bottom.append(dist_bottom)
+            status.scan.dists_top.append(dist_top)
+            status.scan.angles.append(true_heading)
+            status.scan.positions.append(position)
  
-    #print("State: x={:.2f}; y={:.2f}; heading={:.2f}; distance_top={:.6f}; distance_bottom={:.6f}; red={}, green={}".format(position[0], position[1], true_heading/(2*np.pi)*360, dist_top, dist_bottom, colors["red"], colors["green"]))
+ 
+ 
+ 
+    #print("State: x={:.2f}; y={:.2f}; heading={:.2f}; distance_top={:.6f}; distance_bottom={:.6f}; color={}".format(position[0], position[1], true_heading/(2*np.pi)*360, dist_top, dist_bottom, color))
     pass
