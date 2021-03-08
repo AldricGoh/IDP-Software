@@ -30,6 +30,8 @@ class Status:
         self.moving_to_base = False
         self.fine_searching = False
         self.collecting = False
+        self.turning_speed = 0
+        self.detected_boxes = []
         self.turn(0)
         self.move(0)
         
@@ -55,7 +57,12 @@ class Status:
         self.reset()
         self.scanning = True
         self.scan = Scan(initial_heading)
-        self.turn(SCAN_SPEED)
+        self.turn(1)
+    
+    def stop_scan(self):
+        self.scanning = False
+        self.idle = True
+        self.turn(0)
         
 class Scan:
     def __init__(self, initial_heading):

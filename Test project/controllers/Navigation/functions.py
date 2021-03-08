@@ -2,6 +2,14 @@ from controller import Robot, Motor, Keyboard, Compass, GPS
 import numpy as np
 import time
 from setup import *
+from classes import *
+
+status = Status()
+position = [0,0]
+true_heading = 0
+dist_bottom = 0
+dist_top = 0
+colors = {"red":False, "green":False}
 
 def longDSReading():
     """Use sensitivity curve to convert distance sensor raw data to m distance"""
@@ -21,6 +29,13 @@ def longDSReading():
     
     return distance
     
+def get_object_position(dist, angle, robot_position):
+    """Calculate position estimate for object from distance sensor reading and robot orientation and position"""
+    dist = dist + DISTANCE_SENSOR_OFFSET
+    position = [robot_position[0] + dist*np.cos(angle),
+                robot_position[1] + dist*np.sin(angle)]
+    return position
+
 def shortDSReading():
     """Use sensitivity curve to convert distance sensor raw data to m distance"""
     reading = ds_top.getValue()
@@ -39,41 +54,34 @@ def shortDSReading():
     
     return distance
 
-def robotLocation():
-    coord3d = gps.getValues()
-    coord2d = [coord3d[0],coord3d[2]]
-    return coord2d
- 
-def compassAngle():
-    compassValues = compass.getValues()
-    rad = -np.arctan2(compassValues[0],compassValues[2])
-    return round(rad, 2) #+- sign essential
+def update_state():
+    """Update all global variables according to the current state of the robot"""
     
-def dist(x1,z1,x2,z2):
-    return (x2-x1)**2+(x2-x1)**2
-
-def get_object_position(position,angle,sensordist):
-    #Determines the coordinates of the box
-    x = position[0]
-    z = position[1]
-    return [x+(sensordist+0.025) * np.sin(angle),z+(sensordist+0.025) * np.cos(angle)]#Adds to centroid, may need to be tuned
-
-def checkIfBox():
-    turn()
-    if(dist_bottom < 0.8 and np.abs(dist_bottom-dist_top) > 0.04):
-        
-        
-
-def moveToPosition(position):
-    #moves wheels to position (in rads)
-    left_wheel.setPosition(position)
-    right_wheel.setPosition(position)
-
-def turn(speed):
-    left_wheel.setPosition(float('inf'))
-    right_wheel.setPosition(float('inf'))
-    left_wheel.setVelocity(-speed*MAX_SPEED)
-    right_wheel.setVelocity(speed*MAX_SPEED)
+    # position
+    coord3d = gps.getValues()
+    position = [coord3d[0],coord3d[2]]
+    
+    # heading (in radians 0-2pi)
+    compass_raw = compass.getValues()
+    heading = -np.arctan2(compass_raw[0],compass_raw[2])
+    if(heading <= 0):
+        heading += 2*np.pi
+    # keep track of revolutions to get true heading that doesnt wrap around   
+    spin_direction = np.sign(status.turning_speed)
+    if((spin_direction == 1 and (heading < np.pi and status.previous_heading > np.pi)) or (spin_direction == -1 and (heading > np.pi and status.previous_heading < np.pi))):
+        status.revolutions += spin_direction
+    status.previous_heading = heading
+    true_heading = heading + status.revolutions*2*np.pi
+    
+    # dist_bottom and dist_top not in meters for now
+    dist_bottom = longDSReading()
+    dist_top = shortDSReading()
+    
+    # colors
+    colors["red"] = (ls_red.getValue() >= 2.5)
+    colors["green"] = (ls_green.getValue() >= 2.5)
+    
+    return position, true_heading, dist_bottom, dist_top, colors
 
 def openDoor():
     left_door.setPosition(1.57)
@@ -104,7 +112,7 @@ def checkObstacles(destination):
     #if 
     
 def align(direction):
-    currentAngle = compassAngle()
+    currentAngle = true_heading
     print(currentAngle)
     if currentAngle != direction:
         turn(direction-currentAngle)

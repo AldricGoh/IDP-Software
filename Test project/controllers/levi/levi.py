@@ -14,7 +14,6 @@ dist_bottom = 0
 dist_top = 0
 colors = {"red":False, "green":False}
 
-
 # Functions
 def long_to_ms(reading):
     """Use sensitivity curve to convert distance sensor raw data to m distance"""

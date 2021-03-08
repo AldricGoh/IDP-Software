@@ -9,13 +9,13 @@ MAX_SPEED = 3.14
 WHEEL_RADIUS = 5.08
 ROBOT_WIDTH = 18 + 2*WHEEL_RADIUS
 DISTANCE_SENSOR_OFFSET = 0.115
+ROBOT_COLOUR = "red"
 
 # --DO NOT EDIT--
 TURN_RADIUS = (ROBOT_WIDTH-WHEEL_RADIUS+1.11)/2
 angles = []
 distances = []
 objects = []
-robotStatus = 'START'
 # --DO NOT EDIT--
 
 robot = Robot()
