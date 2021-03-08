@@ -116,13 +116,6 @@ def update_state():
     
     return position, true_heading, dist_bottom, dist_top, color
     
-
-    
-<<<<<<< HEAD
-
-
-
-=======
 def evaluate_scan():
     confirm_boxes = []
     # Initial detection runincluding positions for all detections
@@ -137,7 +130,6 @@ def evaluate_scan():
            else:
                boxes.remove(item)
     return confirm_boxes
->>>>>>> 8fa7102cecf59e151b8176f4bb600e4538355b7d
 
 def align(direction):
     if true_heading != direction:
@@ -170,45 +162,40 @@ while robot.step(timestep) != -1:
     if(status.scanning == True):
         #If scan is done
         if(np.abs(true_heading - status.scan.initial_heading) >= 2*np.pi):
-<<<<<<< HEAD
             boxes = status.scan.evaluate_scan()
-=======
-            status.start_moving()
+            status.start_aligning()
             boxes = evaluate_scan()
->>>>>>> 8fa7102cecf59e151b8176f4bb600e4538355b7d
             print(boxes)
-            status.start_idle()
             
         # If scan is still in progress
         else:
-<<<<<<< HEAD
             status.scan.dists_bottom.append(dist_bottom)
             status.scan.dists_top.append(dist_top)
             status.scan.angles.append(true_heading)
             status.scan.positions.append(position)
- 
- 
- 
-=======
             if(dist_bottom < 0.8 and np.abs(dist_bottom-dist_top) > 0.04):
                 print(get_object_position(dist_bottom, true_heading, position))
                 boxes.append(get_object_position(dist_bottom, true_heading, position))
-            # status.scan.dists_bottom.append(dist_bottom)
-            # status.scan.dists_top.append(dist_top)
-            # status.scan.angles.append(true_heading)
-            # status.scan.positions.append(position)
+    
+    if status.aligning == True:
+         if status.got_box == False:
+            current_target = closest_box()
+            direction = angle(current_target, position)
+            if abs(direction-true_heading) > 0.1:
+                align(direction)
+            else:
+                status.turn(0.3)
+                if dist_bottom < 0.8 and np.abs(dist_bottom-dist_top) > 0.04:
+                    print('Aligned')
+                    status.start_moving()
     
     if status.moving_to_box == True:
-        current_target = closest_box()
-        direction = angle(current_target, position)
-        if abs(direction-true_heading) > 0.1: align(direction)
+        if colors["red"] == False and colors["green"] == False and dist_bottom != 0.45:
+            status.move(-0.4)
         else:
-            status.turn(0.3)
-            if dist_bottom < 0.8 and np.abs(dist_bottom-dist_top) > 0.04:
-                print('Aligned')
-                status.start_idle()
+            print('reached')
+            status.start_idle()
 
->>>>>>> 8fa7102cecf59e151b8176f4bb600e4538355b7d
  
     #print("State: x={:.2f}; y={:.2f}; heading={:.2f}; distance_top={:.6f}; distance_bottom={:.6f}; color={}".format(position[0], position[1], true_heading/(2*np.pi)*360, dist_top, dist_bottom, color))
     pass
