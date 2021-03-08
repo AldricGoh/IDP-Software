@@ -1,54 +1,72 @@
-from controller import Robot, Motor, Keyboard
+from controller import Robot, Motor, Compass
+import numpy as np
 
-
-
-
- 
-
+# Constants
 TIME_STEP = 64
-
 MAX_SPEED = 3.14
 
- 
 
+# Variables
+position = [0,0]
+heading = 0
+dist_bottom = 0
+dist_top = 0
+color = {"red":false, "green":false}
+
+
+# Devices
 robot = Robot()
-
- 
-#get robot motor devices
+# --Motors
 left_wheel = robot.getDevice("left_wheel")
 right_wheel = robot.getDevice("right_wheel")
 left_door = robot.getDevice("left_door")
 right_door = robot.getDevice("right_door")
-
-
-left_wheel.setVelocity(MAX_SPEED)
-right_wheel.setVelocity(MAX_SPEED)
-    
-#get robot sensor devices
-ds_right = robot.getDevice('ds_long')
-ds_left= robot.getDevice('ds_short')
+# --Sensors
+ds_botton = robot.getDevice('ds_long')
+ds_short = robot.getDevice('ds_short')
 ls_red = robot.getDevice('ls_red')
 ls_green = robot.getDevice('ls_green')
+gps = robot.getDevice("gps")
+compass = robot.getDevice("compass")
 
-#enable sensors
+
+# Setup
+# --Set maximum velocities
+left_wheel.setVelocity(MAX_SPEED)
+right_wheel.setVelocity(MAX_SPEED)
+# --Enable sensors
 ds_right.enable(TIME_STEP)
 ds_left.enable(TIME_STEP)
 ls_red.enable(TIME_STEP) 
 ls_green.enable(TIME_STEP)
+gps.enable(TIME_STEP)
+compass.enable(TIME_STEP)
 
 timestep = int(robot.getBasicTimeStep())
 
-def robot_location():
+def update_state():
+    """Update all global variables according to the current state of the robot"""
+    
+    # position
     coord3d = gps.getValues()
-    coord2d = [coord3d[0],coord3d[2]]
-    return coord2d
- 
-def convert_compass_angle(compass_values:list)->float:
+    position = [coord3d[0],coord3d[2]]
+    
+    # heading (in radians)
+    compass_raw = compass.getValue()
+    heading = -np.arctan2(compass_raw[0],compass_raw[2])
+    if heading <=0:
+        heading += 2*np.pi
+    
+    # dist_bottom and dist_top not in cm for now
+    dist_bottom = ds_bottom.getValue()
+    dist_top = ds_top.getValue()
+    
+    # color
+    color.red = (ls_red.getValue() >= 2.5)
+    color.green = (ls_green.getValue() >= 2.5)
+    
+    
 
-    rad = -np.arctan2(compass_values[0],compass_values[2])
-    if rad <=0:
-        rad += 2*np.pi
-    return rad
 
  
 def moveToPosition(position):
