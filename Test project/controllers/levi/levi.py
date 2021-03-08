@@ -83,8 +83,8 @@ def update_state():
 def get_object_position(dist, angle, robot_position):
     """Calculate position estimate for object from distance sensor reading and robot orientation and position"""
     dist = dist + DISTANCE_SENSOR_OFFSET
-    position = [robot_position[0] + dist*np.cos(angle),
-                robot_position[1] + dist*np.sin(angle)]
+    position = [robot_position[0] + dist*np.sin(angle),
+                robot_position[1] + dist*np.cos(angle)]
     return position
     
 def evaluate_scan(dists_top, dists_bottom, angles, positions):
