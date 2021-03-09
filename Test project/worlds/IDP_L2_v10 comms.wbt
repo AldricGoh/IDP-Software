@@ -1,0 +1,546 @@
+#VRML_SIM R2021a utf8
+WorldInfo {
+  basicTimeStep 16
+  coordinateSystem "NUE"
+  contactProperties [
+    ContactProperties {
+      material2 "slippy"
+      coulombFriction [
+        0
+      ]
+    }
+    ContactProperties {
+      material2 "block"
+      coulombFriction [
+        0.01
+      ]
+    }
+    ContactProperties {
+      material2 "body"
+      coulombFriction [
+        0
+      ]
+    }
+    ContactProperties {
+      material2 "wheel"
+      coulombFriction [
+        0.8
+      ]
+    }
+  ]
+}
+Viewpoint {
+  orientation 0.999393977853054 -0.02933356775497648 -0.018740833327625286 5.145588841510438
+  position 0.3842831044127263 4.954872519178636 2.2139594192054606
+}
+Background {
+  skyColor [
+    0.15 0.45 1
+  ]
+}
+Floor {
+  size 2.4 2.4
+  appearance Asphalt {
+  }
+}
+DEF Floor_colour Solid {
+  translation 0 0.0001 0.4
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0 0
+      }
+      geometry Plane {
+        size 0.4 0.4
+      }
+    }
+  ]
+  name "solid(6)"
+}
+DEF Floor_colour Solid {
+  translation 0 0.0001 -0.4
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0 1 0
+      }
+      geometry Plane {
+        size 0.4 0.4
+      }
+    }
+  ]
+  name "solid(5)"
+}
+DEF WALL_1 Solid {
+  translation 1.2 0.05 0
+  children [
+    DEF WALL_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 0 0.333333 0
+        roughness 1
+        metalness 0
+      }
+      geometry Box {
+        size 0.02 0.1 2.38
+      }
+    }
+  ]
+  boundingObject USE WALL_SHAPE
+}
+DEF WALL_2 Solid {
+  translation -1.2 0.05 0
+  children [
+    USE WALL_SHAPE
+  ]
+  name "solid(1)"
+  boundingObject USE WALL_SHAPE
+}
+DEF WALL_3 Solid {
+  translation 0 0.05 -1.2
+  rotation 0 1 0 1.5708
+  children [
+    USE WALL_SHAPE
+  ]
+  name "solid(2)"
+  boundingObject USE WALL_SHAPE
+}
+DEF WALL_4 Solid {
+  translation 0 0.05 1.2
+  rotation 0 1 0 1.5708
+  children [
+    USE WALL_SHAPE
+  ]
+  name "solid(3)"
+  boundingObject USE WALL_SHAPE
+}
+TexturedBackgroundLight {
+  texture "empty_office"
+}
+target {
+  hidden linearVelocity_0 -4.2883145147834756e-18 -2.842168279405809e-17 -7.92544302943879e-18
+  hidden angularVelocity_0 -5.32907051820075e-16 1.0450875312104431e-17 -8.874685183736383e-31
+  translation 0.8 0.024975475000000004 -8.91301449430218e-16
+  rotation 0.15069102237566442 0.9884099709244182 0.01838328459682567 -2.572746932758608e-16
+  colour 0 1 0
+  name "target(2)"
+}
+target {
+  hidden linearVelocity_0 -3.916025014276771e-17 4.984837044795556e-24 1.587917055815693e-17
+  hidden angularVelocity_0 5.329070518200751e-16 2.5484530461940503e-16 2.131628207280304e-15
+  translation 0.44 0.024975475000000004 -1.13
+  rotation 0.013833320264404928 0.9989996462699733 0.04252465170851734 3.9004977428316854e-16
+  colour 0 1 0
+  name "target(4)"
+}
+target {
+  hidden linearVelocity_0 8.25693809418253e-18 2.317054232872749e-23 -1.9678398521567725e-17
+  hidden angularVelocity_0 -1.0846837446788912e-30 -9.254616329828992e-17 2.664535259100407e-16
+  translation -0.29 0.024975475000000004 -0.13
+  rotation 0.16886098921352008 0.9856054860961707 0.008233595749271549 4.611547217444681e-16
+  colour 0 1 0
+  name "target(5)"
+}
+target {
+  hidden linearVelocity_0 2.0015827301349462e-17 -2.842169884236654e-17 -6.465318468905855e-18
+  hidden angularVelocity_0 1.3805065841367707e-30 4.3060963686251814e-17 -1.3322676295501878e-15
+  translation -0.261532 0.024975475000000004 -1.11626
+  rotation -2.5172283259929724e-17 1 -2.695358903836645e-18 1.3090000000000002
+  name "target(3)"
+}
+Robot {
+  translation 0 0.84 0.68
+  children [
+    Receiver {
+      type "infra-red"
+      channel 1
+    }
+    Emitter {
+      type "infra-red"
+    }
+  ]
+  name "Creepy Observer"
+  controller ""
+}
+Robot {
+  translation -0.12209771518079438 0.059777342353674615 -0.25559838475929403
+  rotation 2.397395052517608e-05 0.9999999910879904 0.00013133647256598948 0.7363915711306008
+  children [
+    Receiver {
+      type "infra-red"
+      channel 2
+    }
+    Emitter {
+      type "infra-red"
+      channel 1
+    }
+    Compass {
+      yAxis FALSE
+    }
+    GPS {
+      rotation 0 1 0 -1.5707953071795862
+    }
+    DEF BODY Group {
+      children [
+        Transform {
+          translation 0 0 0.09
+          children [
+            Shape {
+              appearance DEF TEXTURE PBRAppearance {
+                baseColor 1 0 0
+                roughness 0.5
+                metalness 0.5
+              }
+              geometry Box {
+                size 0.22 0.08 0.006
+              }
+            }
+          ]
+        }
+        Transform {
+          translation 0 0 -0.09
+          children [
+            Shape {
+              appearance USE TEXTURE
+              geometry Box {
+                size 0.22 0.08 0.006
+              }
+            }
+          ]
+        }
+        Transform {
+          translation -0.11 0 0
+          rotation 0 1 0 1.5707996938995747
+          children [
+            Shape {
+              appearance USE TEXTURE
+              geometry Box {
+                size 0.18 0.08 0.006
+              }
+            }
+          ]
+        }
+        Transform {
+          translation 0.03 0 0
+          rotation 0 1 0 1.5707996938995747
+          children [
+            Shape {
+              appearance USE TEXTURE
+              geometry Box {
+                size 0.18 0.08 0.006
+              }
+            }
+          ]
+        }
+        Transform {
+          translation -0.04 -0.037 0
+          rotation 1 0 0 1.5707996938995747
+          children [
+            Shape {
+              appearance USE TEXTURE
+              geometry Box {
+                size 0.14 0.18 0.006
+              }
+            }
+          ]
+        }
+        Transform {
+          translation 0 0.037 0
+          rotation 1 0 0 1.5707996938995747
+          children [
+            Shape {
+              appearance USE TEXTURE
+              geometry Box {
+                size 0.22 0.18 0.006
+              }
+            }
+          ]
+        }
+        Transform {
+          translation -0.1 -0.05 0
+          children [
+            Shape {
+              appearance PBRAppearance {
+              }
+              geometry Sphere {
+                radius 0.01
+                subdivision 2
+              }
+            }
+          ]
+        }
+        Transform {
+          translation -0.093 0.046 0
+          children [
+            Shape {
+              appearance USE TEXTURE
+              geometry Box {
+                size 0.04 0.012 0.02
+              }
+            }
+          ]
+        }
+        Transform {
+          translation -0.133 0.055 0
+          children [
+            Shape {
+              appearance USE TEXTURE
+              geometry Box {
+                size 0.12 0.006 0.02
+              }
+            }
+          ]
+        }
+        Transform {
+          translation -0.18675 0.049 0
+          children [
+            Shape {
+              appearance USE TEXTURE
+              geometry Box {
+                size 0.0125 0.006 0.02
+              }
+            }
+          ]
+        }
+      ]
+    }
+    LightSensor {
+      translation -0.18675 0.049 0
+      rotation 0 0 1 -1.5707996938995747
+      name "ls_red"
+      lookupTable [
+        0 0 0
+        0.39 0 0
+        0.4 5 0
+      ]
+      colorFilter 1 0 0
+    }
+    LightSensor {
+      translation -0.18675 0.049 0
+      rotation 0 0 1 -1.5707996938995747
+      name "ls_green"
+      lookupTable [
+        0 0 0
+        0.39 0 0
+        0.4 5 0
+      ]
+      colorFilter 0 1 0
+    }
+    DistanceSensor {
+      translation -0.115 -0.03 0
+      rotation 0 1 0 3.14
+      name "ds_long"
+      model "SHARP long distance sensor 20-150cm"
+      lookupTable [
+        0.15 2.75 0.015
+        0.2 2.51 0.015
+        0.3 1.99 0.015
+        0.4 1.52 0.015
+        0.5 1.25 0.015
+        0.6 1.04 0.015
+        0.7 0.87 0.015
+        0.8 0.79 0.015
+        0.9 0.74 0.015
+        1 0.69 0.015
+        1.1 0.6 0.015
+        1.2 0.55 0.015
+        1.3 0.5 0.015
+        1.4 0.47 0.015
+        1.5 0.45 0.015
+      ]
+    }
+    DistanceSensor {
+      translation -0.115 0 0
+      rotation 0 1 0 3.1415
+      name "ds_short"
+      model "SHARP short distance sensor 10-80cm"
+      lookupTable [
+        0.05 3.1 0.015
+        0.1 2.26 0.015
+        0.2 1.27 0.015
+        0.3 0.92 0.015
+        0.4 0.75 0.015
+        0.5 0.6 0.015
+        0.6 0.5 0.015
+        0.7 0.45 0.015
+        0.8 0.41 0.015
+      ]
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        position 28.888397623868403
+        axis 0 0 -1
+        anchor 0.01 -0.01 0
+      }
+      device [
+        RotationalMotor {
+          name "right_wheel"
+          maxTorque 0.4
+        }
+      ]
+      endPoint Solid {
+        translation 0.010005018943815553 -0.009999465057037114 0.10999995374205448
+        rotation -0.14577173773348437 0.6995548352293305 0.699552451918671 3.431096156935552
+        children [
+          DEF WHEEL Shape {
+            appearance DEF WHEEL_TEXTTURE PBRAppearance {
+            }
+            geometry Cylinder {
+              height 0.02
+              radius 0.05
+            }
+          }
+        ]
+        contactMaterial "wheel"
+        boundingObject USE WHEEL
+        physics Physics {
+          density -1
+          mass 0.1
+        }
+      }
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        position -34.951090177949794
+        axis 0 0 -1
+        anchor 0.01 -0.01 0
+      }
+      device [
+        RotationalMotor {
+          name "left_wheel"
+          maxTorque 0.4
+        }
+      ]
+      endPoint Solid {
+        translation 0.010002227032412722 -0.009995467752781734 -0.10999995313746029
+        rotation -0.5188048943409647 0.6045015826326515 0.6044992292819569 4.098745549166964
+        children [
+          USE WHEEL
+        ]
+        name "solid(1)"
+        contactMaterial "wheel"
+        boundingObject USE WHEEL
+        physics Physics {
+          density -1
+          mass 0.1
+        }
+      }
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        position 1.5699999999998964
+        axis 0 -1 0
+        anchor 0.112 -0.005 0.086
+      }
+      device [
+        RotationalMotor {
+          name "right_door"
+          maxPosition 1.5707
+          maxTorque 0.35
+        }
+      ]
+      endPoint Solid {
+        translation 0.15301441123869416 -0.0050044816746603465 0.10408526832264625
+        rotation 8.117993172924309e-07 -0.9999999999996523 -1.9035267780672644e-07 0.34830021246874965
+        children [
+          DEF DOOR Shape {
+            appearance PBRAppearance {
+            }
+            geometry Box {
+              size 0.09 0.07 0.006
+            }
+          }
+        ]
+        name "solid(2)"
+        boundingObject USE DOOR
+        physics Physics {
+          density 700
+        }
+      }
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        position 1.5700000000002783
+        axis 0 1 0
+        anchor 0.112 -0.005 -0.086
+      }
+      device [
+        RotationalMotor {
+          name "left_door"
+          maxPosition 1.5700000000002783
+          maxTorque 0.35
+        }
+      ]
+      endPoint Solid {
+        translation 0.15301441050641224 -0.005004484308355102 -0.10408526859457554
+        rotation -8.118171590171015e-07 0.9999999999996525 -1.902420011554182e-07 0.34830021965962493
+        children [
+          USE DOOR
+        ]
+        name "solid(3)"
+        boundingObject USE DOOR
+        physics Physics {
+          density 700
+        }
+      }
+    }
+    Solid {
+      translation -0.1 0 0
+      children [
+        DEF BATTERY Shape {
+          appearance USE TEXTURE
+          geometry Box {
+            size 0.02 0.073 0.06
+          }
+        }
+      ]
+      name "battery"
+      boundingObject USE BATTERY
+      physics Physics {
+        density -1
+        mass 0.2
+      }
+    }
+    Solid {
+      translation 0.0075 0 -0.045
+      children [
+        DEF MOTOR Shape {
+          appearance USE TEXTURE
+          geometry Box {
+            size 0.04 0.04 0.084
+          }
+        }
+      ]
+      name "motor_left"
+      boundingObject USE MOTOR
+      physics Physics {
+        density -1
+        mass 0.19
+      }
+    }
+    Solid {
+      translation 0.0075 0 0.045
+      children [
+        DEF MOTOR Shape {
+          appearance USE TEXTURE
+          geometry Box {
+            size 0.04 0.04 0.084
+          }
+        }
+      ]
+      name "motor_left(1)"
+      boundingObject USE MOTOR
+      physics Physics {
+        density -1
+        mass 0.19
+      }
+    }
+  ]
+  contactMaterial "body"
+  boundingObject USE BODY
+  physics Physics {
+    density 700
+  }
+  controller "comms"
+  linearVelocity -6.580515617491181e-12 -1.171388307784373e-15 4.660291227126505e-12
+  angularVelocity 1.029291239433935e-15 -2.755178241213742e-11 -9.531781605588549e-15
+}
