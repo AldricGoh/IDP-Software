@@ -224,39 +224,35 @@ class BoxList:
         return iter(self.info)           
         
     def message_encode(message_type, content):
-    #Encodees message in format (type, coord1, coord2, block color, block status)
-        format = "HffHH"
-        if message_type == "WhereAreYou":
-            message = struct.pack(format,1,0,0,0)#Just a ping
-        elif message_type == "IAmHere":
-            message = struct.pack(format,2,content[0],content[1],0)#coord1, coord2, Null
-        elif message_type == "NewBlock":
-            message = struct.pack(format,3,content[0],content[1],0)#coord1, coord2, Null
-        elif message_type == "BlockRed":
-            message = struct.pack(format,4,0,0,content[0])#Null, Null, ID
-        elif message_type == "BlockGreen":
-            message = struct.pack(format,5,0,0,content[0])#Null, Null, ID
-        elif message_type == "MyBlock":
-            message = struct.pack(format,6,0,0,content[0])#Null, Null, ID
+    #Encodees message in format 
+    #(Am I going for it?, coord1, coord2, block color, Is it removed?)
+        format = "?ffH?"
+        
+        if content[2] == 'red':
+            content[2] = 1
+        elif content[2] == 'green':
+            content[2] = 2
+        else: pass
+        
+        if message_type == "MyBlock":
+            message = struct.pack(format,True,content[0],content[1],content[2], False)
+        elif message_type == "YourBlock":
+            message = struct.pack(format,False,content[0],content[1],content[2], False)
+        elif message_type == "BlockRemoved":
+            message = struct.pack(format,False,content[0],content[1],content[2], True)
         return message
     
     
-    def message_decode(message:bytes)->(str,list):
+    def message_decode(message):
         #Decodes the message sent
-        data=struct.unpack("HffH",message)
-        if data[0] == 1:
-            return ("WhereAreYou", [])
-        elif data[0] ==2:
-            return ("IAmHere", [data[1],data[2]])
-        elif data[0] ==3:
-            return ("NewBlock", [data[1],data[2],data[3]]) 
-        elif data[0] ==4:
-            return ("BlockRed", [data[3]])
-        elif data[0] ==5:
-            return ("BlockGreen", [data[3]])
-        elif data[0] ==6:
-            return ("MyBlock", [data[3]])
-        #Might need a block removed
+        data=list(struct.unpack("HffH",message))
+        
+        if data[3] == 1:
+            data[3] = 'red'
+        elif content[3] == 2:
+            content[3] = 'green'
+        else: pass
+
     
     def sort_all_messages():#Might not need
         while receiver.getQueueLength() > 0:
