@@ -1,4 +1,4 @@
-from controller import Robot, Motor, Compass
+from controller import Robot, Motor, Compass, GPS, Emitter, Receiver
 
 from constants import *
 
@@ -16,7 +16,8 @@ ls_red = robot.getDevice('ls_red')
 ls_green = robot.getDevice('ls_green')
 gps = robot.getDevice("gps")
 compass = robot.getDevice("compass")
-
+emitter = robot.getDevice("emitter")
+receiver = robot.getDevice("receiver")
 
 # Initial setup
 # --Set maximum velocities
@@ -29,3 +30,5 @@ ls_red.enable(TIME_STEP)
 ls_green.enable(TIME_STEP)
 gps.enable(TIME_STEP)
 compass.enable(TIME_STEP)
+receiver.enable(TIME_STEP)
+emitter.enable(TIME_STEP)
