@@ -1,4 +1,3 @@
-from controller import Robot, Motor, Compass
 import numpy as np
 
 from classes import *
@@ -99,7 +98,7 @@ while(np.isnan(heading)):
 print("Sensor readings valid")
 
 
-#status.start_scan(heading)
+status.start_scan(heading)
 
 timestep = int(robot.getBasicTimeStep())  
 while robot.step(timestep) != -1:
@@ -126,32 +125,25 @@ while robot.step(timestep) != -1:
         spin_direction = np.sign(status.turning_speed)
         # If align is done
         if (spin_direction == -1 and heading < status.align.target_heading) or (spin_direction == 1 and heading > status.align.target_heading):
-            status.start_idle()
+            status.start_move_to_box(boxes.closest_to_position(position))
             print("Align finished with heading {:.2f}".format(heading%(2*np.pi)/(2*np.pi)*360))
             
         # If align is close to being done and we havent slowed down yet
         elif (np.abs(status.align.target_heading - heading) < 0.1) and (np.abs(status.turning_speed) == ALIGN_SPEED):
             status.turn(spin_direction*FINE_ALIGN_SPEED)
             
-    # if status.aligning == True:
-         # if status.got_box == False:
-            # current_target = closest_box()
-            # direction = angle(current_target, position)
-            # if abs(direction-true_heading) > 0.1:
-                # align(direction)
-            # else:
-                # status.turn(0.3)
-                # if dist_bottom < 0.8 and np.abs(dist_bottom-dist_top) > 0.04:
-                    # print('Aligned')
-                    # status.start_moving()
-    
-    # if status.moving_to_box == True:
-        # if colors["red"] == False and colors["green"] == False and dist_bottom != 0.45:
-            # status.move(-0.4)
-        # else:
-            # print('reached')
-            # status.start_idle()
+            
+    if status.moving_to_box:
+        print("Color sensor distance to estimated block positions {:.2f}".format(status.move_to_box.distance(position, heading)))
+        
+        if color!=None:
+            print("Color stop")
+            status.start_idle()
+        elif status.move_to_box.distance(position, heading) < 0.02:
+            print("Distance stop")
+            status.start_idle()
+
 
  
-    print("State: x={:.2f}; y={:.2f}; heading={:.2f}; distance_top={:.6f}; distance_bottom={:.6f}; color={}".format(position[0], position[1], heading/(2*np.pi)*360, dist_top, dist_bottom, color))
+    #print("State: x={:.2f}; y={:.2f}; heading={:.2f}; distance_top={:.6f}; distance_bottom={:.6f}; color={}".format(position[0], position[1], heading/(2*np.pi)*360, dist_top, dist_bottom, color))
     pass
