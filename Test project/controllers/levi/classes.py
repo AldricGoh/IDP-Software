@@ -106,7 +106,13 @@ class Scan:
         for i in range(len(self.angles)):
             if self.dists_bottom[i] < 0.8 and np.abs(self.dists_bottom[i]-self.dists_top[i]) > 0.04:
                 boxes.append(self.get_object_position(self.dists_bottom[i], self.angles[i], self.positions[i]))
-        
+                
+        # Get rid of boxes that show up on less than 3 readings (these are likely to be errors)
+        # We found that even on a 100% SCAN_SPEED boxes tend to show up on 4 consecutive readings
+        for box in boxes:
+            if boxes.count(box) < 3:
+                   boxes.remove(item)
+                   
         # Convert to BoxesList object
         boxes = BoxList(boxes)
         
@@ -180,13 +186,7 @@ class BoxList:
         
     def filter(self):
         """Compile a filtered list by getting rid of duplicates and avaraging closeby items that likely correspond to the same box"""
-        boxes = self.boxes
-        
-        # Get rid of boxes that show up on less than 3 readings (these are likely to be errors)
-        # We found that even on a 100% SCAN_SPEED boxes tend to show up on 4 consecutive readings
-        for box in self.boxes:
-            if boxes.count(box) < 3:
-                   boxes.remove(item)
+        boxes = self.boxes       
         
         # Merge duplicates of the same box (this approach should be very quick compared to nested for loops)
         # Convert to tuple of tuples because we need a hashable type to convert to a set
@@ -211,6 +211,15 @@ class BoxList:
             boxes.append(self.average_group(group))
               
         self.boxes = boxes
+        
+    def merge(self, other_box_list):
+        """Merge another BoxList object into the BoxList object and filter for duplicates and closeby ones"""
+        self.boxes.append(other_box_list.boxes)
+        self.filter()
+        
+    def remove(self.box):
+        """Delete a box"""
+        self.boxes.remove(box)
         
     def closest_to_position(self, position):
         """Get closest box to a position"""

@@ -81,23 +81,23 @@ def message_decode(message):
         content[3] = 'green'
     else: pass
 
-def check_messages():
-    #Checks if we get any messages
-    if receiver.getQueueLength() > 0:
-        message = receiver.getData()
-        message = message_decode(message)
-        if message[0] == True:
-            #check if box are in boxes list
-            #remove if yes
-            receiver.nextPacket()
-        elif message[0] == False:
-            if message[4] == True:
-                #check if box are in boxes list
-                #remove if yes
-            else:
-                #add to boxes
+# def check_messages():
+    # #Checks if we get any messages
+    # if receiver.getQueueLength() > 0:
+        # message = receiver.getData()
+        # message = message_decode(message)
+        # if message[0] == True:
+            # #check if box are in boxes list
+            # #remove if yes
+            # receiver.nextPacket()
+        # elif message[0] == False:
+            # if message[4] == True:
+                # #check if box are in boxes list
+                # #remove if yes
+            # else:
+                # #add to boxes
                 
-    else: pass
+    # else: pass
 
 def update_state():
     """Update all global variables according to the current state of the robot"""
@@ -150,7 +150,7 @@ status.start_scan(heading)
 timestep = int(robot.getBasicTimeStep())  
 while robot.step(timestep) != -1:
     # Update robot state & receiver
-    status.messenger.check_messages()
+    # status.messenger.check_messages()
     position, heading, dist_bottom, dist_top, color = update_state()
     
     # If in scanning state
