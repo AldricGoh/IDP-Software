@@ -7,7 +7,7 @@ import time
 """
 Setup
 """
-robot_colour = "green"
+robot_colour = "red"
 home = [0,-0.4]
 if robot_colour =="red":
     home = [0,0.4]
@@ -580,9 +580,6 @@ while robot.step(TIME_STEP) != -1:
     
 
     setSpeed(leftSpeed,rightSpeed)
-    """
-    #If too much time elapsed just end
-    """
     
     #print(angle)      
     #print("Wall dist: " + str(walldist))
