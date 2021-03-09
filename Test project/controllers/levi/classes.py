@@ -25,7 +25,7 @@ class Status:
         self.aligning = False
         self.align = None
         self.moving_to_box = False
-        self.travel = None
+        self.move_to_box = None
         self.aligning = False
         self.moving_to_base = False
         self.fine_searching = False
@@ -67,9 +67,10 @@ class Status:
         self.turn(np.sign(self.align.target_heading-self.align.initial_heading)*ALIGN_SPEED)
         print("Aligning to {}, at heading {:.2f}". format(target, self.align.target_heading%(2*np.pi)/(2*np.pi)*360))        
         
-    def start_moving(self):
+    def start_move_to_box(self, box):
         self.reset()
-        self.moving_to_box = True    
+        self.moving_to_box = True 
+        self.   
     
     
         
@@ -125,7 +126,11 @@ class Align:
                 ideal_target_heading = target_heading+i*(2*np.pi)
                                    
         self.target_heading = ideal_target_heading
-             
+        
+class MoveToBox:
+    def __init__(self, target):
+        self.target = target
+
 class BoxList:
     def __init__(self, boxes):
         self.boxes = boxes

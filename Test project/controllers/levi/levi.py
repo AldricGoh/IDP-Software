@@ -99,7 +99,7 @@ while(np.isnan(heading)):
 print("Sensor readings valid")
 
 
-status.start_scan(heading)
+#status.start_scan(heading)
 
 timestep = int(robot.getBasicTimeStep())  
 while robot.step(timestep) != -1:
@@ -153,5 +153,5 @@ while robot.step(timestep) != -1:
             # status.start_idle()
 
  
-    #print("State: x={:.2f}; y={:.2f}; heading={:.2f}; distance_top={:.6f}; distance_bottom={:.6f}; color={}".format(position[0], position[1], true_heading/(2*np.pi)*360, dist_top, dist_bottom, color))
+    print("State: x={:.2f}; y={:.2f}; heading={:.2f}; distance_top={:.6f}; distance_bottom={:.6f}; color={}".format(position[0], position[1], heading/(2*np.pi)*360, dist_top, dist_bottom, color))
     pass
