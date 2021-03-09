@@ -31,4 +31,7 @@ ls_green.enable(TIME_STEP)
 gps.enable(TIME_STEP)
 compass.enable(TIME_STEP)
 receiver.enable(TIME_STEP)
-emitter.enable(TIME_STEP)
+
+#Change robot channels
+emitter.setChannel(1)
+receiver.setChannel(2)

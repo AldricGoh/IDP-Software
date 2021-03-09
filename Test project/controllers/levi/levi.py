@@ -52,6 +52,53 @@ def short_to_ms(reading):
     
     return distance
 
+def message_encode(message_type, content):
+    #Encodees message in format 
+    #(Am I going for it?, coord1, coord2, block color, Is it removed?)
+    format = "?ffH?"
+        
+    if content[2] == 'red':
+        content[2] = 1
+    elif content[2] == 'green':
+        content[2] = 2
+    else: pass
+        
+    if message_type == "MyBlock":
+        message = struct.pack(format,True,content[0],content[1],content[2], False)
+    elif message_type == "YourBlock":
+        message = struct.pack(format,False,content[0],content[1],content[2], False)
+    elif message_type == "BlockRemoved":
+        message = struct.pack(format,False,content[0],content[1],content[2], True)
+    return message
+
+def message_decode(message):
+    #Decodes the message sent
+    data=list(struct.unpack("?ffH?",message))
+        
+    if data[3] == 1:
+        data[3] = 'red'
+    elif content[3] == 2:
+        content[3] = 'green'
+    else: pass
+
+def check_messages():
+    #Checks if we get any messages
+    if receiver.getQueueLength() > 0:
+        message = receiver.getData()
+        message = message_decode(message)
+        if message[0] == True:
+            #check if box are in boxes list
+            #remove if yes
+            receiver.nextPacket()
+        elif message[0] == False:
+            if message[4] == True:
+                #check if box are in boxes list
+                #remove if yes
+            else:
+                #add to boxes
+                
+    else: pass
+
 def update_state():
     """Update all global variables according to the current state of the robot"""
     
@@ -102,7 +149,8 @@ status.start_scan(heading)
 
 timestep = int(robot.getBasicTimeStep())  
 while robot.step(timestep) != -1:
-    # Update robot state
+    # Update robot state & receiver
+    status.messenger.check_messages()
     position, heading, dist_bottom, dist_top, color = update_state()
     
     # If in scanning state
@@ -111,6 +159,8 @@ while robot.step(timestep) != -1:
         if np.abs(heading - status.scan.initial_heading) >= 2*np.pi:
             boxes = status.scan.evaluate_scan()
             print("Scan finsihed with {} box(es) found at locations {}".format(len(boxes), boxes))
+            #Send target box info to other robot
+            
             status.start_align(heading, position, boxes.closest_to_position(position))
             
         # If scan is still in progress
@@ -137,13 +187,26 @@ while robot.step(timestep) != -1:
         print("Color sensor distance to estimated block positions {:.2f}".format(status.move_to_box.distance(position, heading)))
         
         if color!=None:
-            print("Color stop")
-            status.start_idle()
+            print(color)
+            if color == ROBOT_COLOR:
+                status.start_collecting()
+            else:
+                #Sends signal, remove block from list and move onto next block
+                status.start_idle()
         elif status.move_to_box.distance(position, heading) < 0.02:
             print("Distance stop")
+            status.start_fine_searching()
+            print(color)
+    
+    if status.fine_searching:
+        print("I am here")
+        if color == None:
+            status.move(0.1)
+        else:
+            print(color)
             status.start_idle()
 
-
+    
  
     #print("State: x={:.2f}; y={:.2f}; heading={:.2f}; distance_top={:.6f}; distance_bottom={:.6f}; color={}".format(position[0], position[1], heading/(2*np.pi)*360, dist_top, dist_bottom, color))
     pass

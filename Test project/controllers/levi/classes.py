@@ -73,6 +73,14 @@ class Status:
         self.moving_to_box = True 
         self.move_to_box = MoveToBox(box)
         self.move(MOVE_SPEED)
+        
+    def start_fine_searching(self):
+        self.reset()
+        self.fine_searching = True
+        
+    def start_collecting(self):
+        self.reset()
+        self.collecting = True
              
 class Scan:
     def __init__(self, initial_heading):
@@ -106,6 +114,10 @@ class Scan:
         boxes.filter()
         
         return boxes
+        
+    def check_color(self):
+        """Determines the color of the block it has"""
+        
         
 class Align:
     def __init__(self, initial_heading, initial_position, target):
@@ -209,7 +221,7 @@ class BoxList:
                 
         return closest
         
-    class messenger:
+class messenger:
     def __init__(self, message, info):
         self.message = message
         self.info = info
@@ -223,7 +235,7 @@ class BoxList:
     def __iter__(self):
         return iter(self.info)           
         
-    def message_encode(message_type, content):
+    def message_encode(self, message_type, content):
     #Encodees message in format 
     #(Am I going for it?, coord1, coord2, block color, Is it removed?)
         format = "?ffH?"
@@ -243,7 +255,7 @@ class BoxList:
         return message
     
     
-    def message_decode(message):
+    def message_decode(self, message):
         #Decodes the message sent
         data=list(struct.unpack("HffH",message))
         
@@ -252,28 +264,5 @@ class BoxList:
         elif content[3] == 2:
             content[3] = 'green'
         else: pass
-
-    
-    def sort_all_messages():#Might not need
-        while receiver.getQueueLength() > 0:
-            message = receiver.getData()
-            message_type,data = message_decode(message)
-            if message_type == "WhereAreYou":
-                pass
-            elif message_type == "IAmHere":
-                other_robot_coords = data
-            elif message_type == "NewBlock":
-                blocks.append([data[0],data[1],"Unknown","Unsorted"])
-            elif message_type == "BlockRed":
-                blocks[data[0]][2] = "red"
-            elif message_type == "BlockGreen":
-                blocks[data[0]][2] = "green"
-            elif message_type == "MyBlock":#Choping block means that it will be the next waypoint
-                for item in blocks:
-                    if  item[3] == "Bot2Chope":
-                        item[3] == "Unsorted"
-                blocks[data[0]][3] = "Bot2Chope"
-                #Also unchope other blocks
-            receiver.nextPacket()
 
 
