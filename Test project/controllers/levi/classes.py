@@ -11,12 +11,12 @@ class Status:
         self.previous_heading = 0
         
     def __str__(self):
-        if(self.idle):return "idle"
-        elif(self.scanning):return "scanning"
-        elif(self.moving_to_box):return "moving to box"
-        elif(self.moving_to_base):return "moving to base"
-        elif(self.fine_searching):return "fine searching"
-        elif(self.collecting):return "collecting"
+        if self.idle: return "idle"
+        elif self.scanning: return "scanning"
+        elif self.moving_to_box: return "moving to box"
+        elif self.moving_to_base: return "moving to base"
+        elif self.fine_searching: return "fine searching"
+        elif self.collecting: return "collecting"
         
     def reset(self):
         self.idle = False
@@ -96,7 +96,7 @@ class Scan:
         
         # Get all box position estimates from the scan (rough list with many duplicates)
         for i in range(len(self.angles)):
-            if(self.dists_bottom[i] < 0.8 and np.abs(self.dists_bottom[i]-self.dists_top[i]) > 0.04):
+            if self.dists_bottom[i] < 0.8 and np.abs(self.dists_bottom[i]-self.dists_top[i]) > 0.04:
                 boxes.append(self.get_object_position(self.dists_bottom[i], self.angles[i], self.positions[i]))
         
         # Convert to BoxesList object
@@ -121,7 +121,7 @@ class Align:
         # Determine closest equivalent heading to the initial_heading
         ideal_target_heading = target_heading
         for i in range(-1,2):
-            if(np.abs(target_heading+i*(2*np.pi) - initial_heading) < np.abs(ideal_target_heading - initial_heading)):
+            if np.abs(target_heading+i*(2*np.pi) - initial_heading) < np.abs(ideal_target_heading - initial_heading):
                 ideal_target_heading = target_heading+i*(2*np.pi)
                                    
         self.target_heading = ideal_target_heading
@@ -177,7 +177,7 @@ class BoxList:
         for box1 in boxes:
             group = [box1]
             for box2 in boxes:
-                if(box1 != box2 and self.distance(box1, box2) < 0.07):
+                if box1 != box2 and self.distance(box1, box2) < 0.07:
                     group.append(box2)
                     boxes.remove(box2)
             groups.append(group)

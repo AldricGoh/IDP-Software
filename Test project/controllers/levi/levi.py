@@ -25,12 +25,12 @@ def long_to_ms(reading):
     readings = [2.75,2.51,1.99,1.52,1.25,1.04,0.87,0.79,0.74,0.69,0.6,0.55,0.5,0.47,0.45]
     
     distance = distances[0]
-    if(reading <= readings[-1]):
+    if reading <= readings[-1]:
         distance = distances[-1]
         
     # Return interpolated value
     for i in range(len(readings)-1):
-        if(readings[i] >= reading and readings[i+1] < reading):
+        if readings[i] >= reading and readings[i+1] < reading:
             distance = ((reading - readings[i]) / (readings[i+1] - readings[i]) * (distances[i+1] - distances[i]) + distances[i])
     
     return distance
@@ -43,12 +43,12 @@ def short_to_ms(reading):
     readings = [3.1,2.26,1.27,0.92,0.75,0.6,0.5,0.45,0.41]
     
     distance = distances[0]
-    if(reading <= readings[-1]):
+    if reading <= readings[-1]:
         distance = distances[-1]
         
     # Return interpolated value
     for i in range(len(readings)-1):
-        if(readings[i] >= reading and readings[i+1] < reading):
+        if readings[i] >= reading and readings[i+1] < reading:
             distance = ((reading - readings[i]) / (readings[i+1] - readings[i]) * (distances[i+1] - distances[i]) + distances[i])
     
     return distance
@@ -63,12 +63,12 @@ def update_state():
     # heading (in radians 0-2pi)
     compass_raw = compass.getValues()
     heading = -np.arctan2(compass_raw[0],compass_raw[2])
-    if(heading <= 0):
+    if heading <= 0:
         heading += 2*np.pi
         heading = round(heading, 2)
     # keep track of revolutions to get true heading that doesnt wrap around   
     spin_direction = np.sign(status.turning_speed)
-    if((spin_direction == 1 and (heading < np.pi and status.previous_heading > np.pi)) or (spin_direction == -1 and (heading > np.pi and status.previous_heading < np.pi))):
+    if (spin_direction == 1 and (heading < np.pi and status.previous_heading > np.pi)) or (spin_direction == -1 and (heading > np.pi and status.previous_heading < np.pi)):
         status.revolutions += spin_direction
     status.previous_heading = heading
     true_heading = heading + status.revolutions*2*np.pi
@@ -78,9 +78,9 @@ def update_state():
     dist_top = short_to_ms(ds_top.getValue())
     
     # color
-    if(ls_red.getValue() >= 2.5):
+    if ls_red.getValue() >= 2.5:
         color = "red"
-    elif(ls_green.getValue() >= 2.5):
+    elif ls_green.getValue() >= 2.5:
         color = "green"
     else:
         color = None
@@ -107,9 +107,9 @@ while robot.step(timestep) != -1:
     position, heading, dist_bottom, dist_top, color = update_state()
     
     # If in scanning state
-    if(status.scanning):
+    if status.scanning:
         # If scan is done
-        if(np.abs(heading - status.scan.initial_heading) >= 2*np.pi):
+        if np.abs(heading - status.scan.initial_heading) >= 2*np.pi:
             boxes = status.scan.evaluate_scan()
             print("Scan finsihed with {} box(es) found at locations {}".format(len(boxes), boxes))
             status.start_align(heading, position, boxes.closest_to_position(position))
@@ -122,15 +122,15 @@ while robot.step(timestep) != -1:
             status.scan.positions.append(position)
     
     
-    if(status.aligning):
+    if status.aligning:
         spin_direction = np.sign(status.turning_speed)
         # If align is done
-        if((spin_direction == -1 and heading < status.align.target_heading) or (spin_direction == 1 and heading > status.align.target_heading)):
+        if (spin_direction == -1 and heading < status.align.target_heading) or (spin_direction == 1 and heading > status.align.target_heading):
             status.start_idle()
             print("Align finished with heading {:.2f}".format(heading%(2*np.pi)/(2*np.pi)*360))
             
         # If align is close to being done and we havent slowed down yet
-        elif((np.abs(status.align.target_heading - heading) < 0.1) and (np.abs(status.turning_speed) == ALIGN_SPEED)):
+        elif (np.abs(status.align.target_heading - heading) < 0.1) and (np.abs(status.turning_speed) == ALIGN_SPEED):
             status.turn(spin_direction*FINE_ALIGN_SPEED)
             
     # if status.aligning == True:
