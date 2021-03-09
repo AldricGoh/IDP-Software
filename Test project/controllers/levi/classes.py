@@ -6,18 +6,9 @@ from setup import *
 
 class Status:
     def __init__(self):
-        self.idle = True
-        self.scanning = False
-        self.moving_to_box = False
-        self.moving_to_base = False
-        self.aligning = False
-        self.fine_searching = False
-        self.collecting = False
-        self.got_box = False
-        self.turning_speed = 0
+        self.start_idle()
         self.revolutions = 0
         self.previous_heading = 0
-        self.linear_speed = 0
         
     def __str__(self):
         if(self.idle):return "idle"
@@ -31,7 +22,10 @@ class Status:
         self.idle = False
         self.scanning = False
         self.scan = None
+        self.aligning = False
+        self.align = None
         self.moving_to_box = False
+        self.travel = None
         self.aligning = False
         self.moving_to_base = False
         self.fine_searching = False
@@ -57,20 +51,28 @@ class Status:
     def start_idle(self):
         self.reset()
         self.idle = True
-    
-    def start_moving(self):
-        self.reset()
-        self.moving_to_box = True    
-    
-    def start_aligning(self):
-        self.reset()
-        self.aligning = True
         
     def start_scan(self, initial_heading):
         self.reset()
         self.scanning = True
         self.scan = Scan(initial_heading)
         self.turn(SCAN_SPEED)
+        print("Starting scan")
+        
+    def start_align(self, initial_heading, initial_position, target):
+        self.reset()
+        self.aligning = True
+        # (Initializing an Align object automaticaly calculates the closest equivalent target heading)
+        self.align = Align(initial_heading, initial_position, target)
+        self.turn(np.sign(self.align.target_heading-self.align.initial_heading)*ALIGN_SPEED)
+        print("Aligning to {}, at heading {:.2f}". format(target, self.align.target_heading%(2*np.pi)/(2*np.pi)*360))        
+        
+    def start_moving(self):
+        self.reset()
+        self.moving_to_box = True    
+    
+    
+        
         
 class Scan:
     def __init__(self, initial_heading):
@@ -105,12 +107,40 @@ class Scan:
         
         return boxes
         
+class Align:
+    def __init__(self, initial_heading, initial_position, target):
+        self.initial_heading = initial_heading
+        
+        # Calculate the ideal target_heading taking into account possible turning directions
+        # Calculate target_heading (0-2pi) and add revolutions to catch it up to the true_heading
+        relative_position = [target[0]-initial_position[0],
+                             target[1]-initial_position[1]]
+        target_heading = np.arctan2(relative_position[0], relative_position[1]) 
+        target_heading += (2*np.pi) * (int(self.initial_heading/(2*np.pi)))
+        
+        # Determine closest equivalent heading to the initial_heading
+        ideal_target_heading = target_heading
+        for i in range(-1,2):
+            if(np.abs(target_heading+i*(2*np.pi) - initial_heading) < np.abs(ideal_target_heading - initial_heading)):
+                ideal_target_heading = target_heading+i*(2*np.pi)
+                                   
+        self.target_heading = ideal_target_heading
+             
 class BoxList:
     def __init__(self, boxes):
         self.boxes = boxes
         
     def __str__(self):
         return repr(self.boxes)
+        
+    def __len__(self):
+        return len(self.boxes)
+        
+    def __getitem__(self, i):
+        return self.boxes[i]
+        
+    def __iter__(self):
+        return iter(self.boxes)
         
     def distance(self, box1, box2):
         """Calculate the distance between two boxes"""
@@ -142,7 +172,7 @@ class BoxList:
         # Convert back to list of lists
         boxes = [list(box) for box in boxes]
         
-        print(boxes)
+        # Merge boxes that are less than 7cm away (this is the length of the diagonal of a box)
         groups = []
         for box1 in boxes:
             group = [box1]
@@ -157,6 +187,17 @@ class BoxList:
             boxes.append(self.average_group(group))
               
         self.boxes = boxes
+        
+    def closest_to_position(self, position):
+        """Get closest box to a position"""
+        closest = self.boxes[0]
+        for box in self.boxes:
+            if self.distance(box, position) < self.distance(closest, position):
+                closest = box
+                
+        return closest
+  
+            
           
         
         

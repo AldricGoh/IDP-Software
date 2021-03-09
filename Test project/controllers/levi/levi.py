@@ -9,7 +9,7 @@ from setup import *
 # Variables
 status = Status()
 position = [0,0]
-true_heading = 0
+heading = 0
 dist_bottom = 0
 dist_top = 0
 boxes = None
@@ -115,21 +115,6 @@ def update_state():
         color = None
     
     return position, true_heading, dist_bottom, dist_top, color
-    
-def evaluate_scan():
-    confirm_boxes = []
-    # Initial detection runincluding positions for all detections
-    # Group closeby coordinates together that presumably correcpond to the same box
-    for item in boxes:
-       if boxes.count(item) <= 2:
-           boxes.remove(item)
-       else:
-           if confirm_boxes.count(item) == 0:
-               confirm_boxes.append(item)
-               boxes.remove(item)
-           else:
-               boxes.remove(item)
-    return confirm_boxes
 
 def align(direction):
     if true_heading != direction:
@@ -141,60 +126,67 @@ def align(direction):
 
 # Main code body
 # Pre update robot state
-position, true_heading, dist_bottom, dist_top, color = update_state()
+position, heading, dist_bottom, dist_top, color = update_state()
 
 # Wait for startup (compass gave some nan value on the first 2-3 timesteps)
-while(np.isnan(true_heading)):
+while(np.isnan(heading)):
     robot.step(1)
-    position, true_heading, dist_bottom, dist_top, color = update_state()   
+    position, heading, dist_bottom, dist_top, color = update_state()   
 print("Sensor readings valid")
 
 
-status.start_scan(true_heading)
-#status.turn(0.3)
+status.start_scan(heading)
 
 timestep = int(robot.getBasicTimeStep())  
 while robot.step(timestep) != -1:
     # Update robot state
-    position, true_heading, dist_bottom, dist_top, color = update_state()
+    position, heading, dist_bottom, dist_top, color = update_state()
     
     # If in scanning state
-    if(status.scanning == True):
-        #If scan is done
-        if(np.abs(true_heading - status.scan.initial_heading) >= 2*np.pi):
+    if(status.scanning):
+        # If scan is done
+        if(np.abs(heading - status.scan.initial_heading) >= 2*np.pi):
             boxes = status.scan.evaluate_scan()
-            status.start_aligning()
-            boxes = evaluate_scan()
-            print(boxes)
+            print("Scan finsihed with {} box(es) found at locations {}".format(len(boxes), boxes))
+            status.start_align(heading, position, boxes.closest_to_position(position))
             
         # If scan is still in progress
         else:
             status.scan.dists_bottom.append(dist_bottom)
             status.scan.dists_top.append(dist_top)
-            status.scan.angles.append(true_heading)
+            status.scan.angles.append(heading)
             status.scan.positions.append(position)
-            if(dist_bottom < 0.8 and np.abs(dist_bottom-dist_top) > 0.04):
-                print(get_object_position(dist_bottom, true_heading, position))
-                boxes.append(get_object_position(dist_bottom, true_heading, position))
     
-    if status.aligning == True:
-         if status.got_box == False:
-            current_target = closest_box()
-            direction = angle(current_target, position)
-            if abs(direction-true_heading) > 0.1:
-                align(direction)
-            else:
-                status.turn(0.3)
-                if dist_bottom < 0.8 and np.abs(dist_bottom-dist_top) > 0.04:
-                    print('Aligned')
-                    status.start_moving()
     
-    if status.moving_to_box == True:
-        if colors["red"] == False and colors["green"] == False and dist_bottom != 0.45:
-            status.move(-0.4)
-        else:
-            print('reached')
+    if(status.aligning):
+        spin_direction = np.sign(status.turning_speed)
+        # If align is done
+        if((spin_direction == -1 and heading < status.align.target_heading) or (spin_direction == 1 and heading > status.align.target_heading)):
             status.start_idle()
+            print("Align finished with heading {:.2f}".format(heading%(2*np.pi)/(2*np.pi)*360))
+            
+        # If align is close to being done and we havent slowed down yet
+        elif((np.abs(status.align.target_heading - heading) < 0.1) and (np.abs(status.turning_speed) == ALIGN_SPEED)):
+            status.turn(spin_direction*FINE_ALIGN_SPEED)
+            
+    # if status.aligning == True:
+         # if status.got_box == False:
+            # current_target = closest_box()
+            # direction = angle(current_target, position)
+            # if abs(direction-true_heading) > 0.1:
+                # align(direction)
+            # else:
+                # status.turn(0.3)
+                # if dist_bottom < 0.8 and np.abs(dist_bottom-dist_top) > 0.04:
+                    # print('Aligned')
+                    # status.start_moving()
+    
+    # if status.moving_to_box == True:
+        # if colors["red"] == False and colors["green"] == False and dist_bottom != 0.45:
+            # status.move(-0.4)
+        # else:
+            # print('reached')
+            # status.start_idle()
 
  
     #print("State: x={:.2f}; y={:.2f}; heading={:.2f}; distance_top={:.6f}; distance_bottom={:.6f}; color={}".format(position[0], position[1], true_heading/(2*np.pi)*360, dist_top, dist_bottom, color))
