@@ -221,48 +221,4 @@ class BoxList:
                 
         return closest
         
-class messenger:
-    def __init__(self, message, info):
-        self.message = message
-        self.info = info
-        
-    def __len__(self):
-        return len(self.info)
-        
-    def __getitem__(self, i):
-        return self.info[i]
-        
-    def __iter__(self):
-        return iter(self.info)           
-        
-    def message_encode(self, message_type, content):
-    #Encodees message in format 
-    #(Am I going for it?, coord1, coord2, block color, Is it removed?)
-        format = "?ffH?"
-        
-        if content[2] == 'red':
-            content[2] = 1
-        elif content[2] == 'green':
-            content[2] = 2
-        else: pass
-        
-        if message_type == "MyBlock":
-            message = struct.pack(format,True,content[0],content[1],content[2], False)
-        elif message_type == "YourBlock":
-            message = struct.pack(format,False,content[0],content[1],content[2], False)
-        elif message_type == "BlockRemoved":
-            message = struct.pack(format,False,content[0],content[1],content[2], True)
-        return message
-    
-    
-    def message_decode(self, message):
-        #Decodes the message sent
-        data=list(struct.unpack("HffH",message))
-        
-        if data[3] == 1:
-            data[3] = 'red'
-        elif content[3] == 2:
-            content[3] = 'green'
-        else: pass
-
 

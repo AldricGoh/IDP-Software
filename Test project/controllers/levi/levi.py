@@ -206,7 +206,9 @@ while robot.step(timestep) != -1:
             print(color)
             status.start_idle()
 
-    
+    if status.collecting:
+        print(collecting)
+        
  
     #print("State: x={:.2f}; y={:.2f}; heading={:.2f}; distance_top={:.6f}; distance_bottom={:.6f}; color={}".format(position[0], position[1], heading/(2*np.pi)*360, dist_top, dist_bottom, color))
     pass
