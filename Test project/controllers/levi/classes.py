@@ -224,22 +224,22 @@ class BoxList:
         return iter(self.info)           
         
     def message_encode(message_type, content):
-    #Encodees message in format (type, coord1, coord2, block id, block action)
-    format = "HffH"
-    if message_type == "WhereAreYou":
-        message = struct.pack(format,1,0,0,0)#Just a ping
-    elif message_type == "IAmHere":
-        message = struct.pack(format,2,content[0],content[1],0)#coord1, coord2, Null
-    elif message_type == "NewBlock":
-        message = struct.pack(format,3,content[0],content[1],0)#coord1, coord2, Null
-    elif message_type == "BlockRed":
-        message = struct.pack(format,4,0,0,content[0])#Null, Null, ID
-    elif message_type == "BlockGreen":
-        message = struct.pack(format,5,0,0,content[0])#Null, Null, ID
-    elif message_type == "MyBlock":
-        message = struct.pack(format,6,0,0,content[0])#Null, Null, ID
-    return message
-
+    #Encodees message in format (type, coord1, coord2, block color, block status)
+        format = "HffHH"
+        if message_type == "WhereAreYou":
+            message = struct.pack(format,1,0,0,0)#Just a ping
+        elif message_type == "IAmHere":
+            message = struct.pack(format,2,content[0],content[1],0)#coord1, coord2, Null
+        elif message_type == "NewBlock":
+            message = struct.pack(format,3,content[0],content[1],0)#coord1, coord2, Null
+        elif message_type == "BlockRed":
+            message = struct.pack(format,4,0,0,content[0])#Null, Null, ID
+        elif message_type == "BlockGreen":
+            message = struct.pack(format,5,0,0,content[0])#Null, Null, ID
+        elif message_type == "MyBlock":
+            message = struct.pack(format,6,0,0,content[0])#Null, Null, ID
+        return message
+    
     
     def message_decode(message:bytes)->(str,list):
         #Decodes the message sent
