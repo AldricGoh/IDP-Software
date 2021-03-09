@@ -66,15 +66,6 @@ timestep = int(robot.getBasicTimeStep())
 
 
 
-def turnRadian(radians):
-
-    position = (radians*TURN_RADIUS)/(WHEEL_RADIUS)
-    print(position)
-    left_wheel.setPosition(-position)
-    right_wheel.setPosition(position)
-    left_wheel.setVelocity(MAX_SPEED)
-    right_wheel.setVelocity(MAX_SPEED)
-
 def moveToPosition(position):
     #moves wheels to position (in rads)
     left_wheel.setPosition(position)
@@ -91,18 +82,13 @@ def closeDoor():
     
     
 def setSpeed(speedL,speedR):
-    
     left_wheel.setPosition(float('inf'))
     right_wheel.setPosition(float('inf'))
     left_wheel.setVelocity(speedL*MAX_SPEED)
     right_wheel.setVelocity(speedR*MAX_SPEED)
 
 def convert_compass_angle(compass_values:list)->float:
-    #Returns angle using polar angle system, horizontal axis = 0 rads
-    """rad = np.pi/2 - np.arctan2(compass_values[0],compass_values[2])
-    if rad <=0:
-        rad += 2*np.pi
-    return rad"""
+
     
     rad = -np.arctan2(compass_values[0],compass_values[2])
     if rad <=0:
@@ -111,9 +97,8 @@ def convert_compass_angle(compass_values:list)->float:
 
 def dist_to_wall(angle:float,position:list,sensor_type)->float:
     #Finds what the distance sensor should be reading
-    
     if sensor_type == "short":
-        cap = 0.8
+        cap = 0.8+sensorX
     else:
         cap = 1.5+sensorX
     x = position[0]
@@ -150,14 +135,14 @@ def sensor_to_dist(sensor_value:float,bot_length:float,sensor_type)->float:
         lookup = [0.15,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5]
         lookup2 = [2.75,2.51,1.99,1.52,1.25,1.04,0.87,0.79,0.74,0.69,0.6,0.55,0.5,0.47,0.45]
         if sensor_value <= 0.45:
-            return 1.5 + bot_length
+            return 1.5 +sensorX
         index = [ n for n,i in enumerate(lookup2) if i<sensor_value ][0] - 1
         return (sensor_value - lookup2[index]) / (lookup2[index+1] - lookup2[index]) * (lookup[index+1] - lookup[index]) + lookup[index] + bot_length
     else:
         lookup = [0.05,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8]
         lookup2 = [3.1,2.26,1.27,0.92,0.75,0.6,0.5,0.45,0.41]
         if sensor_value <= 0.41:
-            return 0.8 + bot_length
+            return 0.8+sensorX
         index = [ n for n,i in enumerate(lookup2) if i<sensor_value ][0] - 1
         return (sensor_value - lookup2[index]) / (lookup2[index+1] - lookup2[index]) * (lookup[index+1] - lookup[index]) + lookup[index] + bot_length
     
@@ -270,10 +255,156 @@ def scan(sensordist,walldist):
             pass
             
 def anomalies(sensorLong,sensorShort): 
+    #print(sensorLong)
+    #print(sensorShort)
     if abs(sensorLong - sensorShort) > 0.1:
         #print("Long: " + str(sensorLong))
         #print("Short: " + str(sensorShort))
         return True
+        
+        
+        
+def move_to_coordinate(destination,early_stop):
+    while True:
+        coord3d = gps.getValues()
+        coord2d = [coord3d[0],coord3d[2]]
+        leftSpeed = 0
+        rightSpeed = 0
+        angle = convert_compass_angle(compass.getValues())
+
+        theta_destination = -np.pi/2-np.arctan2(coord2d[1]-destination[1],coord2d[0]-destination[0])
+        if theta_destination <=0:
+            theta_destination += 2*np.pi
+        
+        test_angle = angle
+    
+                
+        if test_angle < theta_destination:
+            test_angle+=np.pi*2
+        if abs(theta_destination - angle) < 0.1:
+            leftSpeed = -1
+            rightSpeed = -1
+            #print(dist(coord2d[0],coord2d[1],destination[0],destination[1]))
+            if dist(coord2d[0],coord2d[1],destination[0],destination[1])<early_stop:
+               leftSpeed = 0
+               rightSpeed = 0
+               setSpeed(leftSpeed,rightSpeed) 
+               return 
+                
+        elif  (test_angle - theta_destination) > np.pi:
+                #print("Turning Left")
+            
+            leftSpeed = -0.3
+            rightSpeed = 0.3
+            if  (test_angle - theta_destination) <  2*np.pi - 0.2:
+                leftSpeed = -0.8
+                rightSpeed = 0.8
+            
+        elif (test_angle - theta_destination) <= np.pi:
+           #print("Turning right")
+            leftSpeed = 0.3
+            rightSpeed = -0.3
+            if  (test_angle - theta_destination) >  0.2:
+                leftSpeed = 0.8
+                rightSpeed = -0.8
+        #print("STEP")       
+        setSpeed(leftSpeed,rightSpeed)       
+        robot.step(1)
+    
+def move_to_angle(target):
+    print("Moving to angle")
+    while True:
+        leftSpeed = 0
+        rightSpeed = 0
+        angle = convert_compass_angle(compass.getValues())
+        theta_destination = target
+        if theta_destination <=0:
+            theta_destination += 2*np.pi
+        test_angle = angle
+        
+        if test_angle < theta_destination:
+            test_angle+=np.pi*2
+        if abs(theta_destination - angle) < 0.03:
+            leftSpeed = 0
+            rightSpeed = 0
+            setSpeed(leftSpeed,rightSpeed)   
+            return        
+        elif  (test_angle - theta_destination) > np.pi:
+                #print("Turning Left")
+            leftSpeed = -0.3
+            rightSpeed = 0.3
+            if  (test_angle - theta_destination) <  2*np.pi - 0.2:
+                leftSpeed = -0.8
+                rightSpeed = 0.8  
+        elif (test_angle - theta_destination) <= np.pi:
+           #print("Turning right")
+            leftSpeed = 0.3
+            rightSpeed = -0.3
+            if  (test_angle - theta_destination) >  0.2:
+                leftSpeed = 0.8
+                rightSpeed = -0.8
+        #print("STEP")       
+        setSpeed(leftSpeed,rightSpeed)       
+        robot.step(1)
+    
+
+def short_scan():
+    angle = convert_compass_angle(compass.getValues())
+    lowest = 100
+    lowest_angle = None
+    start = time.time()
+    leftSpeed = -0.3
+    rightSpeed = 0.3
+    setSpeed(leftSpeed,rightSpeed)  
+    while True:
+        
+        current_angle = convert_compass_angle(compass.getValues())
+        sensordistLong = sensor_to_dist(ds_right.getValue(),sensorX,"long")
+        sensordistShort = sensor_to_dist(ds_right.getValue(),sensorX,"short")
+        if anomalies(sensordistLong,sensordistShort):
+            if sensordistLong < lowest:
+                lowest = sensordistLong
+                lowest_angle = current_angle
+        if abs(angle - current_angle) < 0.1 and time.time()-start > 2:
+            break
+        
+        robot.step(1)
+    move_to_angle(lowest_angle)
+    leftSpeed = -0.3
+    rightSpeed = -0.3
+    setSpeed(leftSpeed,rightSpeed)  
+    while True:
+        ls_red_value = ls_red.getValue()
+        ls_green_value = ls_green.getValue()
+    
+        if ls_red_value > 0:
+            break
+        
+        if ls_green_value > 0:
+            break
+            
+        robot.step(1)
+    target_angle = lowest_angle + np.pi
+    if target_angle >= 2 *np.pi:
+        target_angle -= 2*np.pi
+    move_to_angle(target_angle)
+    openDoor()
+    start = time.time()
+    while time.time()-start <2:
+        leftSpeed = 0.5
+        rightSpeed = 0.5
+        setSpeed(leftSpeed,rightSpeed)  
+        robot.step(1)
+    closeDoor()
+        
+        
+    
+        
+    
+    return None
+        
+def pickup_found_block():
+    pass
 
 while robot.step(TIME_STEP) != -1:
     
@@ -296,124 +427,32 @@ while robot.step(TIME_STEP) != -1:
         scan(sensordistLong,walldistLong)
         if angle > 3*np.pi/2 and angle < 3*np.pi/2 + 0.1 and time.time() - start >= 2:
             robot_status = "logic"
-    else:
+    """else:
         sensordistLong = sensor_to_dist(ds_right.getValue(),sensorX,"long")
         sensordistShort = sensor_to_dist(ds_left.getValue(),sensorX,"short")
         if sensordistLong > 0.8 + sensorX:
             sensordistLong = 0.8 + sensorX
         if anomalies(sensordistLong,sensordistShort):
-            scan(sensordistLong,sensordistShort)
+            scan(sensordistLong,sensordistShort)"""
 
             
             
     if robot_status == "logic":
         destination = [blocks[0][0],blocks[0][1],"block"]
+        
         print(destination)
         robot_status = "navigating"
-        #for block in blocks:
+
             
         
     
     if robot_status == "navigating":
-        pass
-        #This part is all trash
+        move_to_coordinate(destination,0.1)
+        short_scan()
         
-     """   
-        #Do this if it is further than 60cm away
-        if navigation_status == 0:
-            theta_destination = -np.pi/2-np.arctan2(coord2d[1]-destination[1],coord2d[0]-destination[0])
-            if theta_destination <=0:
-                theta_destination += 2*np.pi
-    
-            test_angle = angle
-            #print(theta_destination)
-            #print(test_angle)
-            
-            if test_angle < theta_destination:
-                test_angle+=np.pi*2
-            if abs(theta_destination - angle) < 0.05:
-                leftSpeed = -0.5
-                rightSpeed = -0.5
-                if hitboxcollision(coord2d[0],coord2d[1],destination[0],destination[1],0.18675):
-                    navigation_status = 1
-            
-            elif  (test_angle - theta_destination) > np.pi:
-                #print("Turning Left")
-                leftSpeed = -1.0
-                rightSpeed = 1.0
-            elif (test_angle - theta_destination) <= np.pi:
-                #print("Turning right")
-                leftSpeed = 1.0
-                rightSpeed = -1.0
-            
-            
-        
-        #Rotate until it sees block colour
-        if navigation_status == 1:
-        
-            leftSpeed = -0.1
-            rightSpeed = 0.1
-            ls_red_value = ls_red.getValue()
-            ls_green_value = ls_green.getValue()
-            if ls_red_value > 0:
-                robot_status = "end"
-        
-            if ls_green_value > 0:
-                print("Green found")
-                
-                setSpeed(0.3,0.3)
-                print("Reversing")
-                openDoor()  
-                passive_wait(1)
-                setSpeed(0,0)
-                turnRadian(np.pi)
-                print("Turning")
-                passive_wait(5)
-                
-                
-                print("Turning")
-                turnRadian(np.pi)
-                passive_wait(5)
-                print("Collecting")
-                moveToPosition(0.3)
-                passive_wait(5)
-                closeDoor()
-                break
-                
-
-                
-        #Pick up the block      
-        if navigation_status == 2: 
-            
-            leftSpeed = -0.3
-            rightSpeed = 0.3
-
-            
-            test_angle = angle
-            #print(theta_destination)
-            #print(test_angle)
-            
-            if test_angle < theta_destination:
-                test_angle+=np.pi*2
-            if abs(theta_destination - angle) < 0.05:
-                leftSpeed = 0.5
-                rightSpeed = 0.5
-                
-                
-                
-
-                
-            #print("close approach")
-        
-
-        
-
-        
-        #Do this if it is less than 40cm away
-
-    
-        
-    """    
+        move_to_coordinate([0,-0.4],0.1)
+        robot_status = "end"
+      
     
     """if robot_status == "checking": 
     #Gets close to block and then checks the colour
