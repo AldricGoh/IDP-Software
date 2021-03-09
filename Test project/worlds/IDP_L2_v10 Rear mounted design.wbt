@@ -30,8 +30,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.5085733560898761 -0.7426440784702948 -0.4356981916286626 1.715156206085007
-  position -1.8721136701258896 2.797086649543417 0.7904978837511096
+  orientation -0.47061985348443486 -0.8673066045670281 -0.16216105321778596 0.7615787218233087
+  position -0.7807766386023921 0.5298656594851247 0.5300442091654336
 }
 Background {
   skyColor [
@@ -295,7 +295,7 @@ Robot {
       ]
     }
     LightSensor {
-      translation -0.18675 0.049 0
+      translation -0.18675 0.039 0
       rotation 0 0 1 -1.5707996938995747
       name "ls_red"
       lookupTable [
@@ -306,7 +306,7 @@ Robot {
       colorFilter 1 0 0
     }
     LightSensor {
-      translation -0.18675 0.049 0
+      translation -0.18675 0.039 0
       rotation 0 0 1 -1.5707996938995747
       name "ls_green"
       lookupTable [
@@ -527,5 +527,5 @@ Robot {
   physics Physics {
     density 700
   }
-  controller "Rear_controller"
+  controller "Tim_controller"
 }

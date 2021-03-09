@@ -8,7 +8,7 @@ import time
 Setup
 """
 start = time.time()
-
+blockid = 0
 blocks = []#format: [coord1,coord2,colour,sorted?]
 other_robot_coords = [0,0.4]
 current_block = None
@@ -255,9 +255,11 @@ def scan(sensordist,walldist):
             pass
             
 def anomalies(sensorLong,sensorShort): 
-    #print(sensorLong)
+    
+    #print(min([sensorLong,0.8 + sensorX]))
     #print(sensorShort)
-    if abs(sensorLong - sensorShort) > 0.1:
+    if abs(min([sensorLong,0.8 + sensorX]) - sensorShort) > 0.2:
+        #print("anomaly detected")
         #print("Long: " + str(sensorLong))
         #print("Short: " + str(sensorShort))
         return True
@@ -312,7 +314,7 @@ def move_to_coordinate(destination,early_stop):
         robot.step(1)
     
 def move_to_angle(target):
-    print("Moving to angle")
+    #print("Moving to angle")
     while True:
         leftSpeed = 0
         rightSpeed = 0
@@ -324,22 +326,22 @@ def move_to_angle(target):
         
         if test_angle < theta_destination:
             test_angle+=np.pi*2
-        if abs(theta_destination - angle) < 0.03:
+        if abs(theta_destination - angle) < 0.01:
             leftSpeed = 0
             rightSpeed = 0
             setSpeed(leftSpeed,rightSpeed)   
             return        
         elif  (test_angle - theta_destination) > np.pi:
                 #print("Turning Left")
-            leftSpeed = -0.3
-            rightSpeed = 0.3
+            leftSpeed = -0.1
+            rightSpeed = 0.1
             if  (test_angle - theta_destination) <  2*np.pi - 0.2:
                 leftSpeed = -0.8
                 rightSpeed = 0.8  
         elif (test_angle - theta_destination) <= np.pi:
            #print("Turning right")
-            leftSpeed = 0.3
-            rightSpeed = -0.3
+            leftSpeed = 0.1
+            rightSpeed = -0.1
             if  (test_angle - theta_destination) >  0.2:
                 leftSpeed = 0.8
                 rightSpeed = -0.8
@@ -353,23 +355,33 @@ def short_scan():
     lowest = 100
     lowest_angle = None
     start = time.time()
-    leftSpeed = -0.3
-    rightSpeed = 0.3
+    leftSpeed = -0.2
+    rightSpeed = 0.2
     setSpeed(leftSpeed,rightSpeed)  
     while True:
         
         current_angle = convert_compass_angle(compass.getValues())
         sensordistLong = sensor_to_dist(ds_right.getValue(),sensorX,"long")
-        sensordistShort = sensor_to_dist(ds_right.getValue(),sensorX,"short")
+        sensordistShort = sensor_to_dist(ds_left.getValue(),sensorX,"short")
+        
+        ####
+        #Need extra logic to check it is the block it actually wants using hitbox
+        ####
         if anomalies(sensordistLong,sensordistShort):
+            
             if sensordistLong < lowest:
                 lowest = sensordistLong
                 lowest_angle = current_angle
+                #print(current_angle)
+                #print(sensordistLong)
         if abs(angle - current_angle) < 0.1 and time.time()-start > 2:
             break
         
         robot.step(1)
+        
+    print(lowest_angle)
     move_to_angle(lowest_angle)
+    print(convert_compass_angle(compass.getValues()))
     leftSpeed = -0.3
     rightSpeed = -0.3
     setSpeed(leftSpeed,rightSpeed)  
@@ -390,19 +402,29 @@ def short_scan():
     move_to_angle(target_angle)
     openDoor()
     start = time.time()
-    while time.time()-start <2:
-        leftSpeed = 0.5
-        rightSpeed = 0.5
-        setSpeed(leftSpeed,rightSpeed)  
-        robot.step(1)
+    
+    drive_straight(0.5,0.5,2)
     closeDoor()
+    move_to_coordinate([0,-0.4],0.02)
+    move_to_angle(angle)
+    openDoor()
+    drive_straight(-0.5,-0.5,3)
+    closeDoor()
+    blocks[blockid][3] = "sorted"
+    
         
         
     
         
     
     return None
-        
+
+def drive_straight(leftSpeed,rightSpeed,t):
+    start = time.time()
+    while time.time()-start <t:
+        setSpeed(leftSpeed,rightSpeed)  
+        robot.step(1)
+       
 def pickup_found_block():
     pass
 
@@ -414,7 +436,7 @@ while robot.step(TIME_STEP) != -1:
 
     angle = convert_compass_angle(compass.getValues())
  
-    
+
     
     if robot_status == "initial scan":
         leftSpeed = -0.4
@@ -438,9 +460,16 @@ while robot.step(TIME_STEP) != -1:
             
             
     if robot_status == "logic":
-        destination = [blocks[0][0],blocks[0][1],"block"]
+        print("Logic")
+        for id in range(len(blocks)):
+            if blocks[id][3] == "Unsorted":
+                blockid = id
+                
+                
+                destination = [blocks[id][0],blocks[id][1],"block"]
+                print("Going to block: " + str(id))
+                break
         
-        print(destination)
         robot_status = "navigating"
 
             
@@ -450,8 +479,9 @@ while robot.step(TIME_STEP) != -1:
         move_to_coordinate(destination,0.1)
         short_scan()
         
-        move_to_coordinate([0,-0.4],0.1)
-        robot_status = "end"
+        
+
+        robot_status = "logic"
       
     
     """if robot_status == "checking": 
