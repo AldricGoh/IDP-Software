@@ -17,35 +17,6 @@ color = None
 
 
 # Functions
-def dist(pos, position):
-    x1 = pos[0]
-    z1 = pos[1]
-    x2 = position[0]
-    z2 = position[1]
-    return (x2-x1)**2+(z2-z1)**2
-    
-def angle(pos, position):
-    x1 = pos[0]
-    z1 = pos[1]
-    x2 = position[0]
-    z2 = position[1]
-    direction = -np.arctan2(x1-x2,z1-z2)
-    if(direction <= 0):
-        direction += 2*np.pi
-        direction = round(direction, 2)
-        
-    return direction
-
-def closest_box():
-    answer = []
-    for box in boxes:
-        if answer == []:
-            answer = box
-        elif dist(answer, position) > dist(box, position):
-            answer = box
-        else: pass
-    return answer
-
 def long_to_ms(reading):
     """Use sensitivity curve to convert distance sensor raw data to m distance"""
     
@@ -116,13 +87,6 @@ def update_state():
     
     return position, true_heading, dist_bottom, dist_top, color
 
-def align(direction):
-    if true_heading != direction:
-        status.turn((direction-true_heading)/3)
-        robot.step(1)
-    else:
-        print('aligned!')
-        status.start_idle()
 
 # Main code body
 # Pre update robot state
