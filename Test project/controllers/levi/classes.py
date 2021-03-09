@@ -30,6 +30,7 @@ class Status:
         self.moving_to_base = False
         self.fine_searching = False
         self.collecting = False
+        self.reversing = False
         self.got_box = False
         self.turn(0)
         self.move(0)
@@ -47,8 +48,23 @@ class Status:
         right_wheel.setPosition(float('inf'))
         left_wheel.setVelocity(-speed*MAX_SPEED)
         right_wheel.setVelocity(speed*MAX_SPEED)  
-        self.turning_speed = speed  
+        self.turning_speed = speed 
         
+    def turnRadian(self, radians):
+        position = (radians*TURN_RADIUS)/(WHEEL_RADIUS)
+        left_wheel.setPosition(-position)
+        right_wheel.setPosition(position)
+        left_wheel.setVelocity(MAX_SPEED)
+        right_wheel.setVelocity(MAX_SPEED) 
+    
+    def openDoor(self):
+        left_door.setPosition(1.57)
+        right_door.setPosition(1.57)
+    
+    def closeDoor(self):
+        left_door.setPosition(0)
+        right_door.setPosition(0)
+    
     def start_idle(self):
         self.reset()
         self.idle = True
@@ -81,6 +97,7 @@ class Status:
     def start_collecting(self):
         self.reset()
         self.collecting = True
+        
              
 class Scan:
     def __init__(self, initial_heading):
