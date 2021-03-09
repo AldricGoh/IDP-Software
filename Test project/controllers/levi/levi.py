@@ -92,12 +92,14 @@ def check_messages():
             receiver.nextPacket()
         elif message[0] == False:
             if message[4] == True:
+                pass
                 #check if box are in boxes list
                 #remove if yes
             else:
-                #add to boxes
-                
-    else: pass
+                pass
+                #add to boxes      
+    else:
+        pass
 
 def update_state():
     """Update all global variables according to the current state of the robot"""
@@ -150,7 +152,7 @@ status.start_scan(heading)
 timestep = int(robot.getBasicTimeStep())  
 while robot.step(timestep) != -1:
     # Update robot state & receiver
-    status.messenger.check_messages()
+    check_messages()
     position, heading, dist_bottom, dist_top, color = update_state()
     
     # If in scanning state
@@ -195,7 +197,8 @@ while robot.step(timestep) != -1:
                 status.start_idle()
         elif status.move_to_box.distance(position, heading) < 0.02:
             print("Distance stop")
-            status.start_fine_searching()
+            # status.start_fine_searching()
+            status.start_collecting()
             print(color)
     
     if status.fine_searching:
@@ -207,7 +210,18 @@ while robot.step(timestep) != -1:
             status.start_idle()
 
     if status.collecting:
-        print(collecting)
+        print('collecting')
+            
+        if dist_bottom < 0.15:
+            status.reversing = True
+            status.move(-0.7)
+            
+        else:
+            status.reversing = False
+            status.turnRadian(np.pi)
+            status.openDoor()
+            status.start_idle()
+            
         
  
     #print("State: x={:.2f}; y={:.2f}; heading={:.2f}; distance_top={:.6f}; distance_bottom={:.6f}; color={}".format(position[0], position[1], heading/(2*np.pi)*360, dist_top, dist_bottom, color))
