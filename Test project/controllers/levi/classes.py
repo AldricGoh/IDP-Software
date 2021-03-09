@@ -234,7 +234,7 @@ class BoxList:
         self.boxes.append(other_box_list.boxes)
         self.filter()
         
-    def remove(self.box):
+    def remove(self, box):
         """Delete a box"""
         self.boxes.remove(box)
         
