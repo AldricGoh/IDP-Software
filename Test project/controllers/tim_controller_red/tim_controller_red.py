@@ -2,7 +2,6 @@ from controller import Robot,GPS,Compass,Receiver,Emitter
 import numpy as np
 import struct
 import time
-from functions import *
 
 """
 Setup
@@ -181,6 +180,7 @@ def hitboxcollision(x1,z1,x2,z2,r2):
         
 def dist(x1,z1,x2,z2):
     return ((x2-x1)**2+(z2-z1)**2)*0.5
+
 
     
 def passive_wait(time):
