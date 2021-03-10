@@ -520,8 +520,6 @@ if robot_colour == "red":
             passive_wait(12)
 
 while robot.step(TIME_STEP) != -1:
-    
-    endThisSuffering()
        
     coord3d = gps.getValues()
     coord2d = [coord3d[0],coord3d[2]]

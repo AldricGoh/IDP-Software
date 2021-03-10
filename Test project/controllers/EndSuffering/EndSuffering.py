@@ -2,14 +2,15 @@ from controller import Robot,GPS,Compass,Receiver,Emitter
 import numpy as np
 import struct
 import time
+import sys
 
 """
 Setup
 """
 robot_colour = "red"
 home = [0,-0.4]
-if robot_colour =="red":
-    home = [0,0.4]
+# if robot_colour =="red":
+    # home = [0,0.4]
 
 start = time.time()
 blockid = 0
@@ -18,7 +19,7 @@ other_robot_coords = [0,0.4]
 current_block = None
 block_hitbox_radius = 0.1 #0.056
 robot_hitbox_radius = None
-robot_status = "initial scan"
+robot_status = None
 destination = [0.5,0.5]
 MAX_SPEED = 3.14
 sensorX = 0.115
@@ -71,11 +72,6 @@ if robot_colour == "red":
 
 receiver.enable(100)
 
-
-timestep = int(robot.getBasicTimeStep())
-
-
-
 def moveToPosition(position):
     #moves wheels to position (in rads)
     left_wheel.setPosition(position)
@@ -98,6 +94,8 @@ def setSpeed(speedL,speedR):
     right_wheel.setVelocity(speedR*MAX_SPEED)
 
 def convert_compass_angle(compass_values):
+
+    
     rad = -np.arctan2(compass_values[0],compass_values[2])
     if rad <=0:
         rad += 2*np.pi
@@ -153,7 +151,10 @@ def sensor_to_dist(sensor_value,bot_length,sensor_type):
             return 0.8+sensorX
         index = [ n for n,i in enumerate(lookup2) if i<sensor_value ][0] - 1
         return (sensor_value - lookup2[index]) / (lookup2[index+1] - lookup2[index]) * (lookup[index+1] - lookup[index]) + lookup[index] + bot_length
-  
+    
+        
+    
+    
 def what_is_it(position,other_robot_position):
     #Determines if the box is interesting
     x = position[0]
@@ -180,7 +181,6 @@ def hitboxcollision(x1,z1,x2,z2,r2):
         
 def dist(x1,z1,x2,z2):
     return ((x2-x1)**2+(z2-z1)**2)*0.5
-
 
     
 def passive_wait(time):
@@ -506,145 +506,22 @@ def drive_straight(leftSpeed,rightSpeed,t):
     while time.time()-start <t:
         setSpeed(leftSpeed,rightSpeed)  
         robot.step(1)
-       
 
 def endThisSuffering():
-    if time.time() - start > 290:
-        robot_status = 'end'
+    if time.time() - start > 3:
+        move_to_coordinate(home, 0.01)
+        print('I arrived here')
+        sys.exit()
         
 
-    
-if robot_colour == "red":
-            passive_wait(12)
+timestep = int(robot.getBasicTimeStep())
 
 while robot.step(TIME_STEP) != -1:
-    
-       
-    coord3d = gps.getValues()
-    coord2d = [coord3d[0],coord3d[2]]
 
-    angle = convert_compass_angle(compass.getValues())
+    while True:
+        endThisSuffering()
+        print(time.time())
+        robot.step(1)
 
-    
-    if robot_status == "initial scan":
-        leftSpeed = -0.4
-        rightSpeed = 0.4
-        #Scans 360 degrees to find all boxes
-        walldistLong =  dist_to_wall(angle,coord2d,"long")
-        sensordistLong = sensor_to_dist(ds_right.getValue(),sensorX,"long")
-        #print("Predicted: " + str(walldistLong))
-        #print("Actual :" + str(sensordistLong))
-        sort_all_messages()
-        if robot_colour == "green" or time.time()-start>=2:
-            scan(sensordistLong,walldistLong)
-        
-        
-        if robot_colour == "green":
-            if angle > 3*np.pi/2 and angle < 3*np.pi/2 + 0.1 and time.time() - start >= 2:
-                robot_status = "logic"
-                leftSpeed = 0
-                rightSpeed = 0
-                setSpeed(leftSpeed,rightSpeed)
-                passive_wait(10)
-        else:
-            if angle > 3*np.pi/2 and angle < 3*np.pi/2 + 0.1 and time.time() - start >= 15:
-                robot_status = "logic"
-    """else:
-        sensordistLong = sensor_to_dist(ds_right.getValue(),sensorX,"long")
-        sensordistShort = sensor_to_dist(ds_left.getValue(),sensorX,"short")
-        if sensordistLong > 0.8 + sensorX:
-            sensordistLong = 0.8 + sensorX
-        if anomalies(sensordistLong,sensordistShort):
-            scan(sensordistLong,sensordistShort)"""
 
-            
-            
-    if robot_status == "logic":
-        #if robot_colour == "red":
-            #passive_wait(0.2)
-        print("Logic")
-        shortest_distance = 10
-        robot_status = "end"
-        sort_all_messages()
-        print(blocks)
-        if robot_colour == "red":
-            passive_wait(0.2)
-        for id in range(len(blocks)):
-            
-            if (blocks[id][3] == "Unsorted" and blocks[id][2] == "Unknown") or (blocks[id][2] == robot_colour and (blocks[id][3] == "Unsorted" or blocks[id][3] == "Bot2Chope")):
-                distance = dist(coord2d[0],coord2d[1],blocks[id][0],blocks[id][1])
-                #print([coord2d[0],coord2d[1],blocks[id][0],blocks[id][1]])
-                #print(distance)
-                if distance < shortest_distance:
-                    shortest_distance = distance
-                    
-                    blockid = id
-
-                
-        if shortest_distance == 10:
-            robot_status = "end" 
-        else:       
-            destination = [blocks[blockid][0],blocks[blockid][1],"block"]
-            message = message_encode("MyBlock",[blockid])
-            emitter.send(message)
-            print("Going to block: " + str(blockid))
-            robot_status = "navigating" 
-                
-        
-
-            
-        #Either search for more or die
-       
-        
-
-            
-        
-    
-    if robot_status == "navigating":
-        print("Navigating")
-        
-        short_scan()
-        
-        
-        
-
-        robot_status = "logic"
-      
-    
-    """if robot_status == "checking": 
-    #Gets close to block and then checks the colour
-    #Does not use previously scanned coordinates
-        check block()
-        
-    if robot_status = "Idle":
-    #selection logic to figure out what to do - also chooses block
-    
-    """
- 
-    """ls_red_value = ls_red.getValue()
-    ls_green_value = ls_green.getValue()
-    
-    if ls_red_value > 0:
-        print("red")
-        
-    if ls_green_value > 0:
-        print("green")  """  
-        
-        
-    if robot_status == "end":
-        move_to_coordinate(home,0.01)
-        leftSpeed = 0
-        rightSpeed = 0
-    
-    
-    sort_all_messages()
-    
-
-    setSpeed(leftSpeed,rightSpeed)
-    """
-    #If too much time elapsed just end
-    """
-    
-    #print(angle)      
-    #print("Wall dist: " + str(walldist))
-    #print("Sensor dist: " + str(sensordist))
+  

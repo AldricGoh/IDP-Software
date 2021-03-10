@@ -30,8 +30,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.9697916306405963 -0.20629896445449356 -0.1301726945425083 1.1602068595898407
-  position -0.8847433668649002 2.7516364535741946 2.01950939850334
+  orientation -0.950907917316893 -0.26861621804213026 -0.15368623942562948 1.0888546162974782
+  position -0.9808040075858103 3.5192020823330865 2.366555014974677
 }
 Background {
   skyColor [
@@ -526,10 +526,10 @@ Robot {
   physics Physics {
     density 700
   }
-  controller "tim_controller_red"
+  controller ""
 }
 Robot {
-  translation 0 0.06 -0.4
+  translation -0.84 0.06 -0.4
   children [
     Receiver {
       type "infra-red"
@@ -902,5 +902,5 @@ Robot {
   physics Physics {
     density 700
   }
-  controller "Tim_controller"
+  controller "EndSuffering"
 }
