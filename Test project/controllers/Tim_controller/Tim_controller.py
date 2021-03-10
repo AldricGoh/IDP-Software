@@ -178,21 +178,13 @@ def what_is_it(position,other_robot_position):
         
         
 def hitboxcollision(x1,z1,x2,z2,r2):
-<<<<<<< Updated upstream
-    if (x2-x1)**2+(z2-z1)**2 <= r2**2:
-=======
     if (x2-x1)**2+(x2-x1)**2 <= r2**2:
->>>>>>> Stashed changes
         return True
     else:
         return False
         
 def dist(x1,z1,x2,z2):
-<<<<<<< Updated upstream
-    return ((x2-x1)**2+(z2-z1)**2)*0.5
-=======
     return (x2-x1)**2+(x2-x1)**2
->>>>>>> Stashed changes
 
     
 def passive_wait(time):
@@ -519,6 +511,9 @@ def drive_straight(leftSpeed,rightSpeed,t):
         setSpeed(leftSpeed,rightSpeed)  
         robot.step(1)
        
+def endThisSuffering():
+    if time.time() - start > 290:
+        robot_status = 'end'
 
     
 if robot_colour == "red":
@@ -526,6 +521,7 @@ if robot_colour == "red":
 
 while robot.step(TIME_STEP) != -1:
     
+    endThisSuffering()
        
     coord3d = gps.getValues()
     coord2d = [coord3d[0],coord3d[2]]

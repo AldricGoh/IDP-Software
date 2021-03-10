@@ -4,7 +4,6 @@ import struct
 import time
 from functions import *
 
-
 """
 Setup
 """
@@ -100,8 +99,6 @@ def setSpeed(speedL,speedR):
     right_wheel.setVelocity(speedR*MAX_SPEED)
 
 def convert_compass_angle(compass_values):
-
-    
     rad = -np.arctan2(compass_values[0],compass_values[2])
     if rad <=0:
         rad += 2*np.pi
@@ -157,10 +154,7 @@ def sensor_to_dist(sensor_value,bot_length,sensor_type):
             return 0.8+sensorX
         index = [ n for n,i in enumerate(lookup2) if i<sensor_value ][0] - 1
         return (sensor_value - lookup2[index]) / (lookup2[index+1] - lookup2[index]) * (lookup[index+1] - lookup[index]) + lookup[index] + bot_length
-    
-        
-    
-    
+  
 def what_is_it(position,other_robot_position):
     #Determines if the box is interesting
     x = position[0]
@@ -514,18 +508,23 @@ def drive_straight(leftSpeed,rightSpeed,t):
         robot.step(1)
        
 
+def endThisSuffering():
+    if time.time() - start > 290:
+        robot_status = 'end'
+        
+
     
 if robot_colour == "red":
             passive_wait(12)
 
 while robot.step(TIME_STEP) != -1:
     
+    endThisSuffering()
        
     coord3d = gps.getValues()
     coord2d = [coord3d[0],coord3d[2]]
 
     angle = convert_compass_angle(compass.getValues())
- 
 
     
     if robot_status == "initial scan":
@@ -638,7 +637,6 @@ while robot.step(TIME_STEP) != -1:
         leftSpeed = 0
         rightSpeed = 0
     
-
     
     sort_all_messages()
     
