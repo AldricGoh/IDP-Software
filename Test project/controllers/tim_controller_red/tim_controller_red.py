@@ -2,6 +2,7 @@ from controller import Robot,GPS,Compass,Receiver,Emitter
 import numpy as np
 import struct
 import time
+from functions import *
 
 
 """
@@ -98,7 +99,7 @@ def setSpeed(speedL,speedR):
     left_wheel.setVelocity(speedL*MAX_SPEED)
     right_wheel.setVelocity(speedR*MAX_SPEED)
 
-def convert_compass_angle(compass_values:list)->float:
+def convert_compass_angle(compass_values):
 
     
     rad = -np.arctan2(compass_values[0],compass_values[2])
@@ -106,7 +107,7 @@ def convert_compass_angle(compass_values:list)->float:
         rad += 2*np.pi
     return rad
 
-def dist_to_wall(angle:float,position:list,sensor_type)->float:
+def dist_to_wall(angle,position,sensor_type):
     #Finds what the distance sensor should be reading
     if sensor_type == "short":
         cap = 0.8+sensorX
@@ -130,13 +131,13 @@ def dist_to_wall(angle:float,position:list,sensor_type)->float:
     else:
         return 0.1
 
-def get_object_position(position:list,angle:float,sensordist:float)->list:
+def get_object_position(position,angle,sensordist):
     #Determines the coordinates of the box
     x = position[0]
     z = position[1]
     return [x+(sensordist+0.025) * np.sin(angle),z+(sensordist+0.025) * np.cos(angle)]#Adds to centroid, may need to be tuned     
         
-def sensor_to_dist(sensor_value:float,bot_length:float,sensor_type)->float:
+def sensor_to_dist(sensor_value,bot_length,sensor_type):
     #Uses sensitivity curve to calculate actual distance, factors in position of sensor
     #return (1000-sensor_value)/666.7 + bot_length
     
@@ -160,7 +161,7 @@ def sensor_to_dist(sensor_value:float,bot_length:float,sensor_type)->float:
         
     
     
-def what_is_it(position:list,other_robot_position:list)->str:
+def what_is_it(position,other_robot_position):
     #Determines if the box is interesting
     x = position[0]
     z = position[1]  
@@ -178,13 +179,13 @@ def what_is_it(position:list,other_robot_position:list)->str:
         return "NewBox"
         
         
-def hitboxcollision(x1:float,z1:float,x2:float,z2:float,r2:float)->bool:
+def hitboxcollision(x1,z1,x2,z2,r2):
     if (x2-x1)**2+(z2-z1)**2 <= r2**2:
         return True
     else:
         return False
         
-def dist(x1:float,z1:float,x2:float,z2:float)->bool:
+def dist(x1,z1,x2,z2):
     return ((x2-x1)**2+(z2-z1)**2)*0.5
 
     
@@ -194,7 +195,7 @@ def passive_wait(time):
         robot.step(1)
         
         
-def message_encode(message_type:str,content:list)->bytes:
+def message_encode(message_type,content):
     #Encodees message in format (type, coord1, coord2, block id, block action)
     format = "HffH"
     if message_type == "WhereAreYou":
@@ -212,7 +213,7 @@ def message_encode(message_type:str,content:list)->bytes:
     return message
 
     
-def message_decode(message:bytes)->(str,list):
+def message_decode(message):
     #Decodes the message sent
     data=struct.unpack("HffH",message)
     if data[0] == 1:
