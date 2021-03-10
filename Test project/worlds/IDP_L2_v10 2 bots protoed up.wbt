@@ -1,0 +1,162 @@
+#VRML_SIM R2021a utf8
+WorldInfo {
+  basicTimeStep 16
+  coordinateSystem "NUE"
+  contactProperties [
+    ContactProperties {
+      material2 "slippy"
+      coulombFriction [
+        0
+      ]
+    }
+    ContactProperties {
+      material2 "block"
+      coulombFriction [
+        0.01
+      ]
+    }
+    ContactProperties {
+      material2 "body"
+      coulombFriction [
+        0
+      ]
+    }
+    ContactProperties {
+      material2 "wheel"
+      coulombFriction [
+        0.8
+      ]
+    }
+  ]
+}
+Viewpoint {
+  orientation -0.4462614306993419 -0.8341860533805607 -0.32401290686566925 1.4350576603048912
+  position -3.134829967406273 2.643450133357245 1.0921126521756708
+}
+Background {
+  skyColor [
+    0.15 0.45 1
+  ]
+}
+Floor {
+  size 2.4 2.4
+  appearance Asphalt {
+  }
+}
+DEF Floor_colour Solid {
+  translation 0 0.0001 0.4
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0 0
+      }
+      geometry Plane {
+        size 0.4 0.4
+      }
+    }
+  ]
+  name "solid(6)"
+}
+DEF Floor_colour Solid {
+  translation 0 0.0001 -0.4
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0 1 0
+      }
+      geometry Plane {
+        size 0.4 0.4
+      }
+    }
+  ]
+  name "solid(5)"
+}
+DEF WALL_1 Solid {
+  translation 1.2 0.05 0
+  children [
+    DEF WALL_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 0 0.333333 0
+        roughness 1
+        metalness 0
+      }
+      geometry Box {
+        size 0.02 0.1 2.38
+      }
+    }
+  ]
+  boundingObject USE WALL_SHAPE
+}
+DEF WALL_2 Solid {
+  translation -1.2 0.05 0
+  children [
+    USE WALL_SHAPE
+  ]
+  name "solid(1)"
+  boundingObject USE WALL_SHAPE
+}
+DEF WALL_3 Solid {
+  translation 0 0.05 -1.2
+  rotation 0 1 0 1.5708
+  children [
+    USE WALL_SHAPE
+  ]
+  name "solid(2)"
+  boundingObject USE WALL_SHAPE
+}
+DEF WALL_4 Solid {
+  translation 0 0.05 1.2
+  rotation 0 1 0 1.5708
+  children [
+    USE WALL_SHAPE
+  ]
+  name "solid(3)"
+  boundingObject USE WALL_SHAPE
+}
+TexturedBackgroundLight {
+  texture "empty_office"
+}
+target {
+  translation 0.7 0.03 0
+  colour 0 1 0
+  name "target(2)"
+}
+target {
+  translation -0.7 0.03 0
+  colour 0 1 0
+  name "target(1)"
+}
+target {
+  translation 0.7 0.03 0.65
+  colour 0 1 0
+  name "target(4)"
+}
+target {
+  translation -0.95 0.03 0.96
+  colour 0 1 0
+  name "target(8)"
+}
+target {
+  translation -0.78 0.03 0.41
+  name "target(5)"
+}
+target {
+  translation -0.38 0.03 0.74
+  name "target(6)"
+}
+target {
+  translation -0.79 0.03 -0.85
+  name "target(3)"
+}
+target {
+  translation 0.23 0.03 -0.97
+  name "target(7)"
+}
+IDP_robot2 {
+  translation 0 0.06 -0.4
+  controller "Tim_controller"
+}
+IDP_robot2 {
+  translation 0 0.06 0.4
+  controller "tim_controller_red"
+}

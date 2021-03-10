@@ -1,0 +1,485 @@
+PROTO IDP_robot2 [
+    field SFVec3f                     translation  0 0 0
+    field SFRotation                  rotation     0 1 0 0
+    field SFColor                     color 1 0 0 
+    field SFString                    controller "basic_robot_functions"
+  ]
+  {
+    Robot {
+        translation IS translation
+        rotation IS rotation
+        children [
+            Receiver {
+            type "infra-red"
+            channel 2
+            }
+            Emitter {
+            type "infra-red"
+            channel 1
+            }
+            Compass {
+            yAxis FALSE
+            }
+            GPS {
+            rotation 0 1 0 -1.5707953071795862
+            }
+            DEF BODY Group {
+            children [
+                Transform {
+                translation 0.0225 0 0.09
+                children [
+                    Shape {
+                    appearance DEF TEXTURE PBRAppearance {
+                        baseColor IS color
+                        roughness 0.5
+                        metalness 0.5
+                    }
+                    geometry Box {
+                        size 0.175 0.08 0.006
+                    }
+                    }
+                ]
+                }
+                Transform {
+                translation 0.0226 0 -0.09
+                children [
+                    Shape {
+                    appearance USE TEXTURE
+                    geometry Box {
+                        size 0.175 0.08 0.006
+                    }
+                    }
+                ]
+                }
+                Transform {
+                translation -0.0865 0 -0.06
+                rotation 0 1 0 0.9273
+                children [
+                    Shape {
+                    appearance USE TEXTURE
+                    geometry Box {
+                        size 0.08 0.08 0.006
+                    }
+                    }
+                ]
+                }
+                Transform {
+                translation -0.0865 0 0.06
+                rotation 0 1 0 -0.9273
+                children [
+                    Shape {
+                    appearance USE TEXTURE
+                    geometry Box {
+                        size 0.08 0.08 0.006
+                    }
+                    }
+                ]
+                }
+                Transform {
+                translation -0.11 0 0
+                rotation 0 1 0 1.5707996938995747
+                children [
+                    Shape {
+                    appearance USE TEXTURE
+                    geometry Box {
+                        size 0.06 0.08 0.006
+                    }
+                    }
+                ]
+                }
+                Transform {
+                translation 0.03 0 0
+                rotation 0 1 0 1.5707996938995747
+                children [
+                    Shape {
+                    appearance USE TEXTURE
+                    geometry Box {
+                        size 0.18 0.08 0.006
+                    }
+                    }
+                ]
+                }
+                Transform {
+                translation -0.0175 -0.0370006 0
+                rotation 1 0 0 1.5707996938995747
+                children [
+                    Shape {
+                    appearance USE TEXTURE
+                    geometry Box {
+                        size 0.095 0.18 0.006
+                    }
+                    }
+                ]
+                }
+                Transform {
+                translation -0.0875 -0.037 0
+                rotation 1 0 0 1.5707996938995747
+                children [
+                    Shape {
+                    appearance USE TEXTURE
+                    geometry Box {
+                        size 0.045 0.06 0.006
+                    }
+                    }
+                ]
+                }
+                Transform {
+                translation -0.0655001 0.037 -0.0460001
+                rotation 0 1 0 0.9273
+                children [
+                    Shape {
+                    appearance USE TEXTURE
+                    geometry Box {
+                        size 0.08 0.006 0.045
+                    }
+                    }
+                ]
+                }
+                Transform {
+                translation -0.0655001 0.037 0.0460001
+                rotation 0 1 0 -0.9273
+                children [
+                    Shape {
+                    appearance USE TEXTURE
+                    geometry Box {
+                        size 0.08 0.006 0.045
+                    }
+                    }
+                ]
+                }
+                Transform {
+                translation -0.0655001 -0.037 0.0460001
+                rotation 0 1 0 -0.9273
+                children [
+                    Shape {
+                    appearance USE TEXTURE
+                    geometry Box {
+                        size 0.08 0.006 0.045
+                    }
+                    }
+                ]
+                }
+                Transform {
+                translation -0.0655001 -0.037 -0.0460001
+                rotation 0 1 0 0.9273
+                children [
+                    Shape {
+                    appearance USE TEXTURE
+                    geometry Box {
+                        size 0.08 0.006 0.045
+                    }
+                    }
+                ]
+                }
+                Transform {
+                translation -0.0875 0.037 0
+                rotation 1 0 0 1.5707996938995747
+                children [
+                    Shape {
+                    appearance USE TEXTURE
+                    geometry Box {
+                        size 0.045 0.06 0.006
+                    }
+                    }
+                ]
+                }
+                Transform {
+                translation 0.0225 0.037 0
+                rotation 1 0 0 1.5707996938995747
+                children [
+                    Shape {
+                    appearance USE TEXTURE
+                    geometry Box {
+                        size 0.175 0.18 0.006
+                    }
+                    }
+                ]
+                }
+                Transform {
+                translation -0.1 -0.05 0
+                children [
+                    Shape {
+                    appearance PBRAppearance {
+                    }
+                    geometry Sphere {
+                        radius 0.01
+                        subdivision 2
+                    }
+                    }
+                ]
+                }
+                Transform {
+                translation -0.093 0.046 0
+                children [
+                    Shape {
+                    appearance USE TEXTURE
+                    geometry Box {
+                        size 0.04 0.012 0.02
+                    }
+                    }
+                ]
+                }
+                Transform {
+                translation -0.133 0.055 0
+                children [
+                    Shape {
+                    appearance USE TEXTURE
+                    geometry Box {
+                        size 0.12 0.006 0.02
+                    }
+                    }
+                ]
+                }
+                Transform {
+                translation -0.18675 0.049 0
+                children [
+                    Shape {
+                    appearance USE TEXTURE
+                    geometry Box {
+                        size 0.0125 0.006 0.02
+                    }
+                    }
+                ]
+                }
+            ]
+            }
+            LightSensor {
+            translation -0.18675 0.049 0
+            rotation 0 0 1 -1.5707996938995747
+            name "ls_red"
+            lookupTable [
+                0 0 0
+                0.39 0 0
+                0.4 5 0
+            ]
+            colorFilter 1 0 0
+            }
+            LightSensor {
+            translation -0.18675 0.049 0
+            rotation 0 0 1 -1.5707996938995747
+            name "ls_green"
+            lookupTable [
+                0 0 0
+                0.39 0 0
+                0.4 5 0
+            ]
+            colorFilter 0 1 0
+            }
+            DistanceSensor {
+            translation -0.115 -0.03 0
+            rotation 0 1 0 3.14
+            name "ds_long"
+            model "SHARP long distance sensor 20-150cm"
+            lookupTable [
+                0.15 2.75 0.015
+                0.2 2.51 0.015
+                0.3 1.99 0.015
+                0.4 1.52 0.015
+                0.5 1.25 0.015
+                0.6 1.04 0.015
+                0.7 0.87 0.015
+                0.8 0.79 0.015
+                0.9 0.74 0.015
+                1 0.69 0.015
+                1.1 0.6 0.015
+                1.2 0.55 0.015
+                1.3 0.5 0.015
+                1.4 0.47 0.015
+                1.5 0.45 0.015
+            ]
+            }
+            DistanceSensor {
+            translation -0.115 0 0
+            rotation 0 1 0 3.1415
+            name "ds_short"
+            model "SHARP short distance sensor 10-80cm"
+            lookupTable [
+                0.05 3.1 0.015
+                0.1 2.26 0.015
+                0.2 1.27 0.015
+                0.3 0.92 0.015
+                0.4 0.75 0.015
+                0.5 0.6 0.015
+                0.6 0.5 0.015
+                0.7 0.45 0.015
+                0.8 0.41 0.015
+            ]
+            }
+            HingeJoint {
+            jointParameters HingeJointParameters {
+                position 16.10760147482851
+                axis 0 0 -1
+                anchor 0.01 -0.01 0
+            }
+            device [
+                RotationalMotor {
+                name "right_wheel"
+                maxTorque 0.4
+                }
+            ]
+            endPoint Solid {
+                translation 0.010004790175492065 -0.009998409346124254 0.1099999537420545
+                rotation -0.22282779045980444 0.6893297547838828 0.6893274004189834 3.580083196836421
+                children [
+                DEF WHEEL Shape {
+                    appearance DEF WHEEL_TEXTTURE PBRAppearance {
+                    }
+                    geometry Cylinder {
+                    height 0.02
+                    radius 0.05
+                    }
+                }
+                ]
+                contactMaterial "wheel"
+                boundingObject USE WHEEL
+                physics Physics {
+                density -1
+                mass 0.1
+                }
+            }
+            }
+            HingeJoint {
+            jointParameters HingeJointParameters {
+                position -14.131893888975554
+                axis 0 0 -1
+                anchor 0.01 -0.01 0
+            }
+            device [
+                RotationalMotor {
+                name "left_wheel"
+                maxTorque 0.4
+                }
+            ]
+            endPoint Solid {
+                translation 0.010003311637987648 -0.010003812347315443 -0.10999995313745813
+                rotation -0.19605992057142688 -0.6933845728441842 -0.6933818152268012 3.5287995926580553
+                children [
+                USE WHEEL
+                ]
+                name "solid(1)"
+                contactMaterial "wheel"
+                boundingObject USE WHEEL
+                physics Physics {
+                density -1
+                mass 0.1
+                }
+            }
+            }
+            HingeJoint {
+            jointParameters HingeJointParameters {
+                position 3.196255671055183e-08
+                axis 0 -1 0
+                anchor 0.112 -0.005 0.086
+            }
+            device [
+                RotationalMotor {
+                name "right_door"
+                maxPosition 1.5707
+                maxTorque 0.35
+                }
+            ]
+            endPoint Solid {
+                translation 0.13011792477004674 -0.0050044816746603465 0.04500000412700312
+                rotation 1.3283487146060706e-07 0.9999999999999682 -2.1402072413784337e-07 1.2216997555687377
+                children [
+                DEF DOOR Shape {
+                    appearance PBRAppearance {
+                    }
+                    geometry Box {
+                    size 0.09 0.07 0.006
+                    }
+                }
+                ]
+                name "solid(2)"
+                boundingObject USE DOOR
+                physics Physics {
+                density 700
+                }
+            }
+            }
+            HingeJoint {
+            jointParameters HingeJointParameters {
+                position 6.442779037140051e-09
+                axis 0 1 0
+                anchor 0.112 -0.005 -0.086
+            }
+            device [
+                RotationalMotor {
+                name "left_door"
+                maxPosition 1.57
+                maxTorque 0.35
+                }
+            ]
+            endPoint Solid {
+                translation 0.13011792399506636 -0.005004484308355102 -0.04500000439712904
+                rotation -1.3286231511967881e-07 -0.9999999999999682 -2.1400088564476584e-07 1.2216997738980213
+                children [
+                USE DOOR
+                ]
+                name "solid(3)"
+                boundingObject USE DOOR
+                physics Physics {
+                density 700
+                }
+            }
+            }
+            Solid {
+            translation -0.1 0 0
+            children [
+                DEF BATTERY Shape {
+                appearance USE TEXTURE
+                geometry Box {
+                    size 0.02 0.073 0.06
+                }
+                }
+            ]
+            name "battery"
+            boundingObject USE BATTERY
+            physics Physics {
+                density -1
+                mass 0.2
+            }
+            }
+            Solid {
+            translation 0.0075 0 -0.045
+            children [
+                DEF MOTOR Shape {
+                appearance USE TEXTURE
+                geometry Box {
+                    size 0.04 0.04 0.084
+                }
+                }
+            ]
+            name "motor_left"
+            boundingObject USE MOTOR
+            physics Physics {
+                density -1
+                mass 0.19
+            }
+            }
+            Solid {
+            translation 0.0075 0 0.045
+            children [
+                DEF MOTOR Shape {
+                appearance USE TEXTURE
+                geometry Box {
+                    size 0.04 0.04 0.084
+                }
+                }
+            ]
+            name "motor_left(1)"
+            boundingObject USE MOTOR
+            physics Physics {
+                density -1
+                mass 0.19
+            }
+            }
+        ]
+        contactMaterial "body"
+        boundingObject USE BODY
+        physics Physics {
+            density 700
+        }
+        controller IS controller
+        }
+    }

@@ -11,7 +11,7 @@ home = [0,-0.4]
 if robot_colour =="red":
     home = [0,0.4]
 
-start = time.time()
+
 blockid = 0
 blocks = []#format: [coord1,coord2,colour,sorted?]
 other_robot_coords = [0,0.4]
@@ -30,8 +30,8 @@ TURN_RADIUS = (ROBOT_WIDTH-WHEEL_RADIUS+1.11)/2
 
 TIME_STEP = 64
 robot = Robot()
-
-    
+start = robot.getTime()
+#start = time.time()   
 #get robot motor devices
 left_wheel = robot.getDevice("left_wheel")
 right_wheel = robot.getDevice("right_wheel")
@@ -258,10 +258,10 @@ def scan(sensordist,walldist):
         object_position = get_object_position(coord2d,angle,sensordist)
         status = what_is_it(object_position,1)
         if status == "NewBox":
-            print("New block")
+            print("A new block has been found at: " +str(object_position))
             
             blocks.append([object_position[0],object_position[1],"Unknown","Unsorted"])
-            print(blocks)
+            
             message = message_encode("NewBlock",[object_position[0],object_position[1]])
             emitter.send(message)
  
@@ -330,9 +330,10 @@ def move_to_coordinate(destination,early_stop):
         setSpeed(leftSpeed,rightSpeed)
         sensordistLong = sensor_to_dist(ds_right.getValue(),sensorX,"long")
         sensordistShort = sensor_to_dist(ds_left.getValue(),sensorX,"short") 
-        if sensordistShort  < 0.2:
-            print("obstacle")
+        if sensordistShort  < 0.3:
+            print("There is a robot in my way")
             setSpeed(1,1)
+            passive_wait(2)
         robot.step(1)
     
 def move_to_angle(target):
@@ -453,13 +454,14 @@ def short_scan():
     
         if ls_red_value > 0:
             if robot_colour == "green":
-                print("Oh no a red block")
+                print("This block is red but I am green, get out of my sight")
                 blocks[blockid][2] = "red"
                 blocks[blockid][3] = "ignore"
                 message = message_encode("BlockRed",[blockid])
                 emitter.send(message)
                 return 
             else:
+                print("This block is red and I am red, praise be")
                 message = message_encode("BlockRed",[blockid])
                 emitter.send(message)
                 blocks[blockid][2] = "red"
@@ -467,13 +469,14 @@ def short_scan():
                 break
         if ls_green_value > 0:
             if robot_colour == "red":
-                print("Oh no a green block")
+                print("This block is green but I am red, send help")
                 message = message_encode("BlockGreen",[blockid])
                 emitter.send(message)
                 blocks[blockid][2] = "green"
                 blocks[blockid][3] = "ignore"
                 return 
             else:
+                print("This block is green and I am green, LETS GO")
                 message = message_encode("BlockGreen",[blockid])
                 emitter.send(message)
                 blocks[blockid][2] = "green"
@@ -504,18 +507,19 @@ def short_scan():
     drive_straight(-0.5,-0.5,3)
     closeDoor()
     blocks[blockid][3] = "Sorted"
+    print("The block has been sorted")
     return 
 
 def drive_straight(leftSpeed,rightSpeed,t):
-    start = time.time()
-    while time.time()-start <t:
+    start = robot.getTime()
+    while robot.getTime()-start <t:
         setSpeed(leftSpeed,rightSpeed)  
         robot.step(1)
        
 
     
 if robot_colour == "red":
-            passive_wait(12)
+            passive_wait(8)
 
 while robot.step(TIME_STEP) != -1:
     
@@ -541,14 +545,14 @@ while robot.step(TIME_STEP) != -1:
         
         
         if robot_colour == "green":
-            if angle > 3*np.pi/2 and angle < 3*np.pi/2 + 0.1 and time.time() - start >= 2:
+            if angle > 3*np.pi/2 and angle < 3*np.pi/2 + 0.1 and robot.getTime() - start >= 2:
                 robot_status = "logic"
                 leftSpeed = 0
                 rightSpeed = 0
                 setSpeed(leftSpeed,rightSpeed)
-                passive_wait(10)
+                passive_wait(6)
         else:
-            if angle > 3*np.pi/2 and angle < 3*np.pi/2 + 0.1 and time.time() - start >= 15:
+            if angle > 3*np.pi/2 and angle < 3*np.pi/2 + 0.1 and robot.getTime() - start >= 13:
                 robot_status = "logic"
     """else:
         sensordistLong = sensor_to_dist(ds_right.getValue(),sensorX,"long")
@@ -561,13 +565,10 @@ while robot.step(TIME_STEP) != -1:
             
             
     if robot_status == "logic":
-        #if robot_colour == "red":
-            #passive_wait(0.2)
-        print("Logic")
         shortest_distance = 10
         robot_status = "end"
         sort_all_messages()
-        print(blocks)
+        #print(blocks)
         if robot_colour == "red":
             passive_wait(0.2)
         for id in range(len(blocks)):
@@ -602,7 +603,7 @@ while robot.step(TIME_STEP) != -1:
         
     
     if robot_status == "navigating":
-        print("Navigating")
+        #print("Navigating")
         
         short_scan()
         
@@ -636,6 +637,7 @@ while robot.step(TIME_STEP) != -1:
         move_to_coordinate(home,0.01)
         leftSpeed = 0
         rightSpeed = 0
+        print("PROGRAM TERMINATED")
     
 
     
