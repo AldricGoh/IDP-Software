@@ -258,7 +258,10 @@ def scan(sensordist,walldist):
         object_position = get_object_position(coord2d,angle,sensordist)
         status = what_is_it(object_position,1)
         if status == "NewBox":
+            print("New block")
+            
             blocks.append([object_position[0],object_position[1],"Unknown","Unsorted"])
+            print(blocks)
             message = message_encode("NewBlock",[object_position[0],object_position[1]])
             emitter.send(message)
  
@@ -269,11 +272,14 @@ def anomalies(sensorLong,sensorShort):
     
     #print(min([sensorLong,0.8 + sensorX]))
     #print(sensorShort)
-    if abs(min([sensorLong,0.8 + sensorX]) - sensorShort) > 0.2:
+    if abs(min([sensorLong,0.8 + sensorX]) - sensorShort) > 0.1:
         #print("anomaly detected")
         #print("Long: " + str(sensorLong))
         #print("Short: " + str(sensorShort))
         return True
+        
+    else:
+        return False
         
         
         
@@ -321,10 +327,12 @@ def move_to_coordinate(destination,early_stop):
                 leftSpeed = 0.8
                 rightSpeed = -0.8
         #print("STEP")       
-        setSpeed(leftSpeed,rightSpeed) 
-        if sensordistLong  < 0.2:
+        setSpeed(leftSpeed,rightSpeed)
+        sensordistLong = sensor_to_dist(ds_right.getValue(),sensorX,"long")
+        sensordistShort = sensor_to_dist(ds_left.getValue(),sensorX,"short") 
+        if sensordistShort  < 0.2:
             print("obstacle")
-            #setSpeed(0,0)
+            setSpeed(1,1)
         robot.step(1)
     
 def move_to_angle(target):
@@ -373,6 +381,11 @@ def short_scan():
     leftSpeed = -0.2
     rightSpeed = 0.2
     setSpeed(leftSpeed,rightSpeed)  
+    
+    
+    
+    #Find angle bit method 1
+    """
     while True:
         
         current_angle = convert_compass_angle(compass.getValues())
@@ -380,9 +393,7 @@ def short_scan():
         sensordistShort = sensor_to_dist(ds_left.getValue(),sensorX,"short")
         coord3d = gps.getValues()
         coord2d = [coord3d[0],coord3d[2]]
-        ####
-        #Need extra logic to check it is the block it actually wants using hitbox
-        #### Done
+
         if anomalies(sensordistLong,sensordistShort):
             object_coord = get_object_position(coord2d,current_angle,sensordistLong)
             
@@ -396,6 +407,39 @@ def short_scan():
             break
         
         robot.step(1)
+    """
+    move_to_angle(angle-0.5)
+
+    leftSpeed = -0.2
+    rightSpeed = 0.2
+    setSpeed(leftSpeed,rightSpeed)  
+    seen_yet = 0
+    while True:
+        current_angle = convert_compass_angle(compass.getValues())
+        sensordistLong = sensor_to_dist(ds_right.getValue(),sensorX,"long")
+        sensordistShort = sensor_to_dist(ds_left.getValue(),sensorX,"short")
+        coord3d = gps.getValues()
+        coord2d = [coord3d[0],coord3d[2]]
+        if seen_yet == 0:
+            if anomalies(sensordistLong,sensordistShort):
+                #print("seen anomaly")
+                object_coord = get_object_position(coord2d,current_angle,sensordistLong)
+                if dist(blocks[blockid][0],blocks[blockid][1],object_coord[0],object_coord[1]) < 0.05:
+                   seen_yet = 1
+                   angle1 = current_angle
+        else:
+            #(anomalies(sensordistLong,sensordistShort))
+            if anomalies(sensordistLong,sensordistShort) == False:
+                #print("No anomaly")
+                angle2 = current_angle
+                if angle2 < angle1:
+                    angle1-=np.pi*2
+                lowest_angle = (angle1+angle2)/2
+                break
+        
+        
+        robot.step(1)
+   
         
     #print(lowest_angle)
     move_to_angle(lowest_angle)
@@ -447,7 +491,15 @@ def short_scan():
     drive_straight(0.5,0.5,2)
     closeDoor()
     move_to_coordinate(home,0.02)
-    move_to_angle(angle)
+    coord3d = gps.getValues()
+    coord2d = [coord3d[0],coord3d[2]]
+    #print(coord2d[0])
+    #print(coord2d[1])
+    #print(home[0])
+    #print(home[1])
+    end_angle = np.arctan2(coord2d[0]-home[0],coord2d[1]-home[1])
+    
+    move_to_angle(end_angle)
     openDoor()
     drive_straight(-0.5,-0.5,3)
     closeDoor()
@@ -460,11 +512,10 @@ def drive_straight(leftSpeed,rightSpeed,t):
         setSpeed(leftSpeed,rightSpeed)  
         robot.step(1)
        
-def pickup_found_block():
-    pass
-    
-    
 
+    
+if robot_colour == "red":
+            passive_wait(12)
 
 while robot.step(TIME_STEP) != -1:
     
@@ -484,9 +535,21 @@ while robot.step(TIME_STEP) != -1:
         sensordistLong = sensor_to_dist(ds_right.getValue(),sensorX,"long")
         #print("Predicted: " + str(walldistLong))
         #print("Actual :" + str(sensordistLong))
-        scan(sensordistLong,walldistLong)
-        if angle > 3*np.pi/2 and angle < 3*np.pi/2 + 0.1 and time.time() - start >= 2:
-            robot_status = "logic"
+        sort_all_messages()
+        if robot_colour == "green" or time.time()-start>=2:
+            scan(sensordistLong,walldistLong)
+        
+        
+        if robot_colour == "green":
+            if angle > 3*np.pi/2 and angle < 3*np.pi/2 + 0.1 and time.time() - start >= 2:
+                robot_status = "logic"
+                leftSpeed = 0
+                rightSpeed = 0
+                setSpeed(leftSpeed,rightSpeed)
+                passive_wait(10)
+        else:
+            if angle > 3*np.pi/2 and angle < 3*np.pi/2 + 0.1 and time.time() - start >= 15:
+                robot_status = "logic"
     """else:
         sensordistLong = sensor_to_dist(ds_right.getValue(),sensorX,"long")
         sensordistShort = sensor_to_dist(ds_left.getValue(),sensorX,"short")
@@ -498,8 +561,8 @@ while robot.step(TIME_STEP) != -1:
             
             
     if robot_status == "logic":
-        if robot_colour == "red":
-            passive_wait(0.2)
+        #if robot_colour == "red":
+            #passive_wait(0.2)
         print("Logic")
         shortest_distance = 10
         robot_status = "end"
