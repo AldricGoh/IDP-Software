@@ -6,12 +6,13 @@ import time
 """
 Setup
 """
+robot = Robot()
 robot_colour = "red"
 home = [0,-0.4]
 if robot_colour =="red":
     home = [0,0.4]
 
-start = time.time()
+start = robot.getTime()
 blockid = 0
 blocks = []#format: [coord1,coord2,colour,sorted?]
 other_robot_coords = [0,0.4]
@@ -29,7 +30,6 @@ ROBOT_WIDTH = 18 + 2*WHEEL_RADIUS
 TURN_RADIUS = (ROBOT_WIDTH-WHEEL_RADIUS+1.11)/2
 
 TIME_STEP = 64
-robot = Robot()
 
     
 #get robot motor devices
@@ -98,6 +98,8 @@ def setSpeed(speedL,speedR):
     right_wheel.setVelocity(speedR*MAX_SPEED)
 
 def convert_compass_angle(compass_values):
+
+    
     rad = -np.arctan2(compass_values[0],compass_values[2])
     if rad <=0:
         rad += 2*np.pi
@@ -153,7 +155,10 @@ def sensor_to_dist(sensor_value,bot_length,sensor_type):
             return 0.8+sensorX
         index = [ n for n,i in enumerate(lookup2) if i<sensor_value ][0] - 1
         return (sensor_value - lookup2[index]) / (lookup2[index+1] - lookup2[index]) * (lookup[index+1] - lookup[index]) + lookup[index] + bot_length
-  
+    
+        
+    
+    
 def what_is_it(position,other_robot_position):
     #Determines if the box is interesting
     x = position[0]
@@ -180,7 +185,6 @@ def hitboxcollision(x1,z1,x2,z2,r2):
         
 def dist(x1,z1,x2,z2):
     return ((x2-x1)**2+(z2-z1)**2)*0.5
-
 
     
 def passive_wait(time):
@@ -372,7 +376,7 @@ def short_scan():
     angle = convert_compass_angle(compass.getValues())
     lowest = 100
     lowest_angle = None
-    start = time.time()
+    start = robot.getTime()
     leftSpeed = -0.2
     rightSpeed = 0.2
     setSpeed(leftSpeed,rightSpeed)  
@@ -476,12 +480,13 @@ def short_scan():
                 break
             
         robot.step(1)
+    
     target_angle = lowest_angle + np.pi
     if target_angle >= 2 *np.pi:
         target_angle -= 2*np.pi
     move_to_angle(target_angle)
     openDoor()
-    start = time.time()
+    start = robot.getTime()
     
     drive_straight(0.5,0.5,2)
     closeDoor()
@@ -502,28 +507,28 @@ def short_scan():
     return 
 
 def drive_straight(leftSpeed,rightSpeed,t):
-    start = time.time()
-    while time.time()-start <t:
+    start = robot.getTime()
+    while robot.getTime()-start <t:
         setSpeed(leftSpeed,rightSpeed)  
         robot.step(1)
        
-
 def endThisSuffering():
-    if time.time() - start > 290:
-        robot_status = 'end'
-        
+    if robot.getTime() - start > 290:
+        move_to_coordinate(home, 0.01)
+        print('I arrived here')
+        sys.exit()
 
     
 if robot_colour == "red":
             passive_wait(12)
 
 while robot.step(TIME_STEP) != -1:
-    
        
     coord3d = gps.getValues()
     coord2d = [coord3d[0],coord3d[2]]
 
     angle = convert_compass_angle(compass.getValues())
+ 
 
     
     if robot_status == "initial scan":
@@ -535,19 +540,19 @@ while robot.step(TIME_STEP) != -1:
         #print("Predicted: " + str(walldistLong))
         #print("Actual :" + str(sensordistLong))
         sort_all_messages()
-        if robot_colour == "green" or time.time()-start>=2:
+        if robot_colour == "green" or robot.getTime()-start>=1:
             scan(sensordistLong,walldistLong)
         
         
         if robot_colour == "green":
-            if angle > 3*np.pi/2 and angle < 3*np.pi/2 + 0.1 and time.time() - start >= 2:
+            if angle > 3*np.pi/2 and angle < 3*np.pi/2 + 0.1 and robot.getTime() - start >= 1:
                 robot_status = "logic"
                 leftSpeed = 0
                 rightSpeed = 0
                 setSpeed(leftSpeed,rightSpeed)
                 passive_wait(10)
         else:
-            if angle > 3*np.pi/2 and angle < 3*np.pi/2 + 0.1 and time.time() - start >= 15:
+            if angle > 3*np.pi/2 and angle < 3*np.pi/2 + 0.1 and robot.getTime() - start >= 15:
                 robot_status = "logic"
     """else:
         sensordistLong = sensor_to_dist(ds_right.getValue(),sensorX,"long")
@@ -635,7 +640,9 @@ while robot.step(TIME_STEP) != -1:
         move_to_coordinate(home,0.01)
         leftSpeed = 0
         rightSpeed = 0
+        sys.exit()
     
+
     
     sort_all_messages()
     

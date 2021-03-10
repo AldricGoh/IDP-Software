@@ -6,12 +6,13 @@ import time
 """
 Setup
 """
+robot = Robot()
 robot_colour = "green"
 home = [0,-0.4]
 if robot_colour =="red":
     home = [0,0.4]
 
-start = time.time()
+start = robot.getTime()
 blockid = 0
 blocks = []#format: [coord1,coord2,colour,sorted?]
 other_robot_coords = [0,0.4]
@@ -29,7 +30,6 @@ ROBOT_WIDTH = 18 + 2*WHEEL_RADIUS
 TURN_RADIUS = (ROBOT_WIDTH-WHEEL_RADIUS+1.11)/2
 
 TIME_STEP = 64
-robot = Robot()
 
     
 #get robot motor devices
@@ -376,7 +376,7 @@ def short_scan():
     angle = convert_compass_angle(compass.getValues())
     lowest = 100
     lowest_angle = None
-    start = time.time()
+    start = robot.getTime()
     leftSpeed = -0.2
     rightSpeed = 0.2
     setSpeed(leftSpeed,rightSpeed)  
@@ -480,12 +480,13 @@ def short_scan():
                 break
             
         robot.step(1)
+    
     target_angle = lowest_angle + np.pi
     if target_angle >= 2 *np.pi:
         target_angle -= 2*np.pi
     move_to_angle(target_angle)
     openDoor()
-    start = time.time()
+    start = robot.getTime()
     
     drive_straight(0.5,0.5,2)
     closeDoor()
@@ -506,14 +507,16 @@ def short_scan():
     return 
 
 def drive_straight(leftSpeed,rightSpeed,t):
-    start = time.time()
-    while time.time()-start <t:
+    start = robot.getTime()
+    while robot.getTime()-start <t:
         setSpeed(leftSpeed,rightSpeed)  
         robot.step(1)
        
 def endThisSuffering():
-    if time.time() - start > 290:
-        robot_status = 'end'
+    if robot.getTime() - start > 290:
+        move_to_coordinate(home, 0.01)
+        print('I arrived here')
+        sys.exit()
 
     
 if robot_colour == "red":
@@ -537,19 +540,19 @@ while robot.step(TIME_STEP) != -1:
         #print("Predicted: " + str(walldistLong))
         #print("Actual :" + str(sensordistLong))
         sort_all_messages()
-        if robot_colour == "green" or time.time()-start>=2:
+        if robot_colour == "green" or robot.getTime()-start>=1:
             scan(sensordistLong,walldistLong)
         
         
         if robot_colour == "green":
-            if angle > 3*np.pi/2 and angle < 3*np.pi/2 + 0.1 and time.time() - start >= 2:
+            if angle > 3*np.pi/2 and angle < 3*np.pi/2 + 0.1 and robot.getTime() - start >= 1:
                 robot_status = "logic"
                 leftSpeed = 0
                 rightSpeed = 0
                 setSpeed(leftSpeed,rightSpeed)
                 passive_wait(10)
         else:
-            if angle > 3*np.pi/2 and angle < 3*np.pi/2 + 0.1 and time.time() - start >= 15:
+            if angle > 3*np.pi/2 and angle < 3*np.pi/2 + 0.1 and robot.getTime() - start >= 15:
                 robot_status = "logic"
     """else:
         sensordistLong = sensor_to_dist(ds_right.getValue(),sensorX,"long")
@@ -637,6 +640,7 @@ while robot.step(TIME_STEP) != -1:
         move_to_coordinate(home,0.01)
         leftSpeed = 0
         rightSpeed = 0
+        sys.exit()
     
 
     
