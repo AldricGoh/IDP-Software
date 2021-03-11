@@ -667,8 +667,32 @@ while robot.step(TIME_STEP) != -1:
             robot_status = "end" 
         else:       
             destination = [blocks[blockid][0],blocks[blockid][1],"block"]
+            #Check if destination will coincide with end Zones
+            #If robot originally in endzone proceed normally
+            if abs(coord2d[0]) <= 0.2 and (abs(coord2d[1] <= 0.6 and abs(coord2d[1] >= 0.2):
+                #Robot position is in endzone, proceed normally
+                pass
+            else: 
+                if intersect_endzone(coord2d, destination, theta_destination):
+                    #endzone will be breached
+                    #Change destination (need to figure out how)
+                    #Temporarily pass first
+                    pass
+            
+            #Check if paths of bots will intersect
+            #If intersect, let green go first until paths do not intersect
+            if intersect_other_robot_path(coord2d, destination, other_position, other_destination):
+                #REMEMBER TO CHANGE THE VARIABLES
+                if robot_colour == 'red'
+                    passive_wait(0.2)
+                    robot.step(1)
+                else:
+                    pass
+                    
+                     
             message = message_encode("MyBlock",[blockid])
             emitter.send(message)
+            #Need to send robot position to another bot
             print("Going to block: " + str(blockid))
             robot_status = "navigating" 
                 
