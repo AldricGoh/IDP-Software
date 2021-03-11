@@ -156,8 +156,6 @@ def sensor_to_dist(sensor_value,bot_length,sensor_type):
         index = [ n for n,i in enumerate(lookup2) if i<sensor_value ][0] - 1
         return (sensor_value - lookup2[index]) / (lookup2[index+1] - lookup2[index]) * (lookup[index+1] - lookup[index]) + lookup[index] + bot_length
     
-        
-    
     
 def what_is_it(position,other_robot_position):
     #Determines if the box is interesting
@@ -182,6 +180,7 @@ def hitboxcollision(x1,z1,x2,z2,r2):
         return True
     else:
         return False
+
         
 def dist(x1,z1,x2,z2):
     return ((x2-x1)**2+(z2-z1)**2)*0.5
@@ -228,6 +227,7 @@ def message_decode(message):
         return ("MyBlock", [data[3]])
     #Might need a block removed
 
+
 def sort_all_messages():#Might not need
     while receiver.getQueueLength() > 0:
         message = receiver.getData()
@@ -251,6 +251,7 @@ def sort_all_messages():#Might not need
         receiver.nextPacket()
         #print(blocks)
 
+
 def scan(sensordist,walldist):
     if sensordist < 1.55 and sensordist<walldist * 0.9:#Need to tune this value so no false positives
         #print("Object found at " + str(angle) + " Sensor dist: "+str(sensordist)+ " Wall dist: " + str(walldist))
@@ -266,6 +267,7 @@ def scan(sensordist,walldist):
  
         else:
             pass
+
             
 def anomalies(sensorLong,sensorShort): 
     
@@ -279,8 +281,79 @@ def anomalies(sensorLong,sensorShort):
         
     else:
         return False
+
+
+def wheel_travel_info(position, destination, angle):
+    """Returns a list of coordinates of the edge of the wheels of the robot
+    and their respective destinations"""        
+    r = ROBOT_WIDTH/2
+    return [[position[0] - r*np.sin(angle), position[1] + r*np.cos(angle)], \
+        [position[0] + r*np.sin(angle), position[1] - r*np.cos(angle)], \
+        [destination[0] - r*np.sin(angle), destination[1] + r*np.cos(angle)], \
+        [destination[0] + r*np.sin(angle), destination[1] - r*np.cos(angle)]] 
+  
         
+def lines_intersect(pos1, pos2, pos3, pos4):
+    """determines whether or not lines
+    pos1-pos2 and pos3-pos4 intersect. Returns True if collision occurs"""
+    uA = ((pos4[0]-pos3[0])*(pos1[1]-pos3[1]) \
+        - (pos4[1]-pos3[1])*(pos1[0]-pos3[0])) / ((pos4[1]-pos3[1])*(pos2[0]-pos1[0]) \
+        - (pos4[0]-pos3[0])*(pos2[1]-pos1[1]))
+    
+    uB = ((pos2[0]-pos1[0])*(pos1[1]-pos3[1]) \
+        - (pos2[1]-pos1[1])*(pos1[0]-pos3[0])) / ((pos4[1]-pos3[1])*(pos2[0]-pos1[0]) \
+        - (pos4[0]-pos3[0])*(pos2[1]-pos1[1]))
+    
+    if uA >= 0 and uA <= 1 and uB >= 0 and uB <= 1:
+        return True
+    else:
+        return False
+     
+def intersect_endzone(current_position, destination, theta_destination):
+    """Return True if robot will pass through endzones"""
+    #Corners of endzones
+    endzone_red = [[0.2, 0.2], [0.2, 0.6], [-0.2, 0.2], [-0.2, 0.6]]
+    endzone_green = [[0.2, -0.2], [0.2, -0.6], [-0.2, -0.2], [-0.2, -0.6]]
+    
+    #Takes into account width of robot
+    info = wheel_travel_info(current_position, destination, theta_destination)
+    
+    for i in range(2):
+        if lines_intersect(info[i], info[i+2], endzone_red[0], endzone_red[1]) \
+            or lines_intersect(info[i], info[i+2], endzone_red[0], endzone_red[2]) \
+            or lines_intersect(info[i], info[i+2], endzone_red[1], endzone_red[3]) \
+            or lines_intersect(info[i], info[i+2], endzone_red[2], endzone_red[3]) \
+            or lines_intersect(info[i], info[i+2], endzone_green[0], endzone_green[1]) \
+            or lines_intersect(info[i], info[i+2], endzone_green[0], endzone_green[2]) \
+            or lines_intersect(info[i], info[i+2], endzone_green[1], endzone_green[3]) \
+            or lines_intersect(info[i], info[i+2], endzone_green[2], endzone_green[3]):
+                return True
+    
+    else:
+        return False
         
+#Can make an edit to this function to avoid redundant calculations
+def intersect_other_robot_path(current_position, destination, other_position, other_destination):
+    """Returns True if robots paths coincide""" 
+    #Takes into account width of robot
+    theta_destination_1 = -np.pi/2-np.arctan2(current_position[1]-destination[1],current_position[0]-destination[0])
+        if theta_destination_1 <=0:
+            theta_destination_1 += 2*np.pi
+    
+    theta_destination_2 = -np.pi/2-np.arctan2(other_position[1]-other_destination[1],other_position[0]-other_destination[0])
+        if theta_destination_2 <=0:
+            theta_destination_2 += 2*np.pi        
+    
+    info_1 = wheel_travel_info(current_position, destination, theta_destination_1)
+    info_2 = wheel_travel_info(current_position, destination, theta_destination_2)
+    
+    for i in range(2):
+        for j in range(2):
+            if lines_intersect(info_1[i], info_1[i+2], info_2[j], info_2[j+2]):
+                return True
+    
+    return False   
+     
         
 def move_to_coordinate(destination,early_stop):
     while True:
@@ -414,6 +487,7 @@ def short_scan():
     setSpeed(leftSpeed,rightSpeed)  
     seen_yet = 0
     while True:
+        endThisSuffering()
         current_angle = convert_compass_angle(compass.getValues())
         sensordistLong = sensor_to_dist(ds_right.getValue(),sensorX,"long")
         sensordistShort = sensor_to_dist(ds_left.getValue(),sensorX,"short")
@@ -447,6 +521,7 @@ def short_scan():
     rightSpeed = -0.3
     setSpeed(leftSpeed,rightSpeed)  
     while True:
+        endThisSuffering()
         ls_red_value = ls_red.getValue()
         ls_green_value = ls_green.getValue()
     
@@ -509,20 +584,22 @@ def short_scan():
 def drive_straight(leftSpeed,rightSpeed,t):
     start = robot.getTime()
     while robot.getTime()-start <t:
+        endThisSuffering()
         setSpeed(leftSpeed,rightSpeed)  
         robot.step(1)
        
 def endThisSuffering():
     if robot.getTime() - start > 290:
         move_to_coordinate(home, 0.01)
-        print('I arrived here')
+        print("I'm back home!")
         sys.exit()
 
     
 if robot_colour == "red":
-            passive_wait(12)
+            passive_wait(2)
 
 while robot.step(TIME_STEP) != -1:
+    endThisSuffering()
        
     coord3d = gps.getValues()
     coord2d = [coord3d[0],coord3d[2]]
