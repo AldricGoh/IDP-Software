@@ -26,8 +26,8 @@ MAX_SPEED = 3.14
 sensorX = 0.115
 sensorZ = 0 #redundant
 navigation_status = 0
-WHEEL_RADIUS = 5.08
-ROBOT_WIDTH = 18 + 2*WHEEL_RADIUS
+WHEEL_RADIUS = 0.0508
+ROBOT_WIDTH = 0.18 + 2*WHEEL_RADIUS
 TURN_RADIUS = (ROBOT_WIDTH-WHEEL_RADIUS+1.11)/2
 
 TIME_STEP = 64
@@ -304,6 +304,8 @@ def lines_intersect(pos1, pos2, pos3, pos4):
     uB = ((pos2[0]-pos1[0])*(pos1[1]-pos3[1]) \
         - (pos2[1]-pos1[1])*(pos1[0]-pos3[0])) / ((pos4[1]-pos3[1])*(pos2[0]-pos1[0]) \
         - (pos4[0]-pos3[0])*(pos2[1]-pos1[1]))
+    
+    print(uA, uB)
     
     if uA >= 0 and uA <= 1 and uB >= 0 and uB <= 1:
         return True
@@ -614,8 +616,5 @@ while robot.step(TIME_STEP) != -1:
         theta_destination += 2*np.pi
     
     #check if function works
-    if intersect_endzone(coord2d, destination, theta_destination):
-        print('success')
-        sys.exit()
-        
-    print('not right')
+    print(intersect_endzone(coord2d, destination, theta_destination))
+
