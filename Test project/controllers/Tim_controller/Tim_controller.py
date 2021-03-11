@@ -26,8 +26,8 @@ MAX_SPEED = 3.14
 sensorX = 0.115
 sensorZ = 0 #redundant
 navigation_status = 0
-WHEEL_RADIUS = 5.08
-ROBOT_WIDTH = 18 + 2*WHEEL_RADIUS
+WHEEL_RADIUS = 0.0508
+ROBOT_WIDTH = 0.18 + 2*WHEEL_RADIUS
 TURN_RADIUS = (ROBOT_WIDTH-WHEEL_RADIUS+1.11)/2
 
 TIME_STEP = 64
@@ -284,9 +284,13 @@ def anomalies(sensorLong,sensorShort):
         return False
 
 
-def wheel_travel_info(position, destination, angle):
+def wheel_travel_info(position, destination):
     """Returns a list of coordinates of the edge of the wheels of the robot
     and their respective destinations"""        
+    angle = -np.pi/2-np.arctan2(position[1]-destination[1],position[0]-destination[0])
+    if angle <=0:
+        angle += 2*np.pi
+    
     r = ROBOT_WIDTH/2
     return [[position[0] - r*np.sin(angle), position[1] + r*np.cos(angle)], \
         [position[0] + r*np.sin(angle), position[1] - r*np.cos(angle)], \
@@ -310,14 +314,14 @@ def lines_intersect(pos1, pos2, pos3, pos4):
     else:
         return False
      
-def intersect_endzone(current_position, destination, theta_destination):
+def intersect_endzone(current_position, destination):
     """Return True if robot will pass through endzones"""
     #Corners of endzones
     endzone_red = [[0.2, 0.2], [0.2, 0.6], [-0.2, 0.2], [-0.2, 0.6]]
     endzone_green = [[0.2, -0.2], [0.2, -0.6], [-0.2, -0.2], [-0.2, -0.6]]
     
     #Takes into account width of robot
-    info = wheel_travel_info(current_position, destination, theta_destination)
+    info = wheel_travel_info(current_position, destination)
     
     for i in range(2):
         if lines_intersect(info[i], info[i+2], endzone_red[0], endzone_red[1]) \
@@ -337,16 +341,8 @@ def intersect_endzone(current_position, destination, theta_destination):
 def intersect_other_robot_path(current_position, destination, other_position, other_destination):
     """Returns True if robots paths coincide""" 
     #Takes into account width of robot
-    theta_destination_1 = -np.pi/2-np.arctan2(current_position[1]-destination[1],current_position[0]-destination[0])
-        if theta_destination_1 <=0:
-            theta_destination_1 += 2*np.pi
-    
-    theta_destination_2 = -np.pi/2-np.arctan2(other_position[1]-other_destination[1],other_position[0]-other_destination[0])
-        if theta_destination_2 <=0:
-            theta_destination_2 += 2*np.pi        
-    
-    info_1 = wheel_travel_info(current_position, destination, theta_destination_1)
-    info_2 = wheel_travel_info(current_position, destination, theta_destination_2)
+    info_1 = wheel_travel_info(current_position, destination)
+    info_2 = wheel_travel_info(current_position, destination)
     
     for i in range(2):
         for j in range(2):
@@ -674,7 +670,7 @@ while robot.step(TIME_STEP) != -1:
                 #Robot position is in endzone, proceed normally
                 pass
             else: 
-                if intersect_endzone(coord2d, destination, theta_destination):
+                if intersect_endzone(coord2d, destination):
                     #endzone will be breached
                     #Change destination (need to figure out how)
                     #Temporarily pass first

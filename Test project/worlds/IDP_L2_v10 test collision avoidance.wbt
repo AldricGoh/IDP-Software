@@ -529,7 +529,7 @@ Robot {
   controller ""
 }
 Robot {
-  translation -0.65 0.06 -0.4
+  translation -0.65 0.06 0.95
   rotation 0 1 0 3.14159
   children [
     Receiver {
