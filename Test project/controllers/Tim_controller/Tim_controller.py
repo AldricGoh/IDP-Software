@@ -17,7 +17,7 @@ blockid = 0
 blocks = []#format: [coord1,coord2,colour,sorted?]
 other_robot_coords = [0,0.4]
 current_block = None
-block_hitbox_radius = 0.1 #0.056
+block_hitbox_radius = 0.2 #0.056
 robot_hitbox_radius = None
 robot_status = "initial scan"
 destination = [0.5,0.5]
@@ -318,19 +318,19 @@ def move_to_coordinate(destination,early_stop):
         elif  (test_angle - theta_destination) > np.pi:
                 #print("Turning Left")
             
-            leftSpeed = -0.3
+            leftSpeed = -0.4
             rightSpeed = 0.3
             if  (test_angle - theta_destination) <  2*np.pi - 0.2:
-                leftSpeed = -0.8
+                leftSpeed = -0.9
                 rightSpeed = 0.8
             
         elif (test_angle - theta_destination) <= np.pi:
            #print("Turning right")
             leftSpeed = 0.3
-            rightSpeed = -0.3
+            rightSpeed = -0.4
             if  (test_angle - theta_destination) >  0.2:
                 leftSpeed = 0.8
-                rightSpeed = -0.8
+                rightSpeed = -0.9
         #print("STEP")       
         setSpeed(leftSpeed,rightSpeed)
         sensordistLong = sensor_to_dist(ds_right.getValue(),sensorX,"long")
@@ -364,15 +364,15 @@ def move_to_angle(target):
             leftSpeed = -0.1
             rightSpeed = 0.1
             if  (test_angle - theta_destination) <  2*np.pi - 0.2:
-                leftSpeed = -0.8
-                rightSpeed = 0.8  
+                leftSpeed = -0.7
+                rightSpeed = 0.7  
         elif (test_angle - theta_destination) <= np.pi:
            #print("Turning right")
             leftSpeed = 0.1
             rightSpeed = -0.1
             if  (test_angle - theta_destination) >  0.2:
-                leftSpeed = 0.8
-                rightSpeed = -0.8
+                leftSpeed = 0.7
+                rightSpeed = -0.7
         #print("STEP")       
         setSpeed(leftSpeed,rightSpeed)       
         robot.step(1)
@@ -420,6 +420,7 @@ def short_scan():
     rightSpeed = 0.2
     setSpeed(leftSpeed,rightSpeed)  
     seen_yet = 0
+    loop_preventer = robot.getTime()
     while True:
         endThisSuffering()
         current_angle = convert_compass_angle(compass.getValues())
@@ -427,6 +428,22 @@ def short_scan():
         sensordistShort = sensor_to_dist(ds_left.getValue(),sensorX,"short")
         coord3d = gps.getValues()
         coord2d = [coord3d[0],coord3d[2]]
+        if robot.getTime() - loop_preventer > 10:
+            print("This block is gone goddamnit")
+            if robot_colour == "red":
+                message = message_encode("BlockRed",[blockid])
+                emitter.send(message)
+                blocks[blockid][3] = "ignore"
+                blocks[blockid][2] = "green"
+
+            else:
+                message = message_encode("BlockGreen",[blockid])
+                emitter.send(message)
+                blocks[blockid][3] = "ignore"
+                blocks[blockid][2] = "red"
+            return  
+        
+        
         if seen_yet == 0:
             if anomalies(sensordistLong,sensordistShort):
                 #print("seen anomaly")
@@ -611,7 +628,7 @@ while robot.step(TIME_STEP) != -1:
     
     if robot_status == "navigating":
         #print("Navigating")
-        
+        print(blocks)
         short_scan()
         
         
