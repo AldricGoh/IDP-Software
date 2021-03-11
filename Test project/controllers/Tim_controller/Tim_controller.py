@@ -2,6 +2,7 @@ from controller import Robot,GPS,Compass,Receiver,Emitter
 import numpy as np
 import struct
 import time
+import sys
 
 """
 Setup
@@ -156,7 +157,11 @@ def sensor_to_dist(sensor_value,bot_length,sensor_type):
         index = [ n for n,i in enumerate(lookup2) if i<sensor_value ][0] - 1
         return (sensor_value - lookup2[index]) / (lookup2[index+1] - lookup2[index]) * (lookup[index+1] - lookup[index]) + lookup[index] + bot_length
     
-        
+def endThisSuffering():
+    if robot.getTime() - start > 280:
+        move_to_coordinate(home, 0.01)
+        print("I'm back home!")
+        sys.exit()        
     
     
 def what_is_it(position,other_robot_position):
@@ -378,7 +383,7 @@ def short_scan():
     angle = convert_compass_angle(compass.getValues())
     lowest = 100
     lowest_angle = None
-    start = time.time()
+    #start = time.time()
     leftSpeed = -0.2
     rightSpeed = 0.2
     setSpeed(leftSpeed,rightSpeed)  
@@ -416,6 +421,7 @@ def short_scan():
     setSpeed(leftSpeed,rightSpeed)  
     seen_yet = 0
     while True:
+        endThisSuffering()
         current_angle = convert_compass_angle(compass.getValues())
         sensordistLong = sensor_to_dist(ds_right.getValue(),sensorX,"long")
         sensordistShort = sensor_to_dist(ds_left.getValue(),sensorX,"short")
@@ -449,6 +455,7 @@ def short_scan():
     rightSpeed = -0.3
     setSpeed(leftSpeed,rightSpeed)  
     while True:
+        endThisSuffering()
         ls_red_value = ls_red.getValue()
         ls_green_value = ls_green.getValue()
     
@@ -489,7 +496,7 @@ def short_scan():
         target_angle -= 2*np.pi
     move_to_angle(target_angle)
     openDoor()
-    start = time.time()
+    #start = time.time()
     
     drive_straight(0.5,0.5,2)
     closeDoor()
@@ -522,7 +529,7 @@ if robot_colour == "red":
             passive_wait(8)
 
 while robot.step(TIME_STEP) != -1:
-    
+    endThisSuffering()
        
     coord3d = gps.getValues()
     coord2d = [coord3d[0],coord3d[2]]
@@ -540,7 +547,7 @@ while robot.step(TIME_STEP) != -1:
         #print("Predicted: " + str(walldistLong))
         #print("Actual :" + str(sensordistLong))
         sort_all_messages()
-        if robot_colour == "green" or time.time()-start>=2:
+        if robot_colour == "green" or robot.getTime()-start>=2:
             scan(sensordistLong,walldistLong)
         
         
@@ -638,6 +645,7 @@ while robot.step(TIME_STEP) != -1:
         leftSpeed = 0
         rightSpeed = 0
         print("PROGRAM TERMINATED")
+        sys.exit()
     
 
     
