@@ -338,12 +338,12 @@ def intersect_other_robot_path(current_position, destination, other_position, ot
     """Returns True if robots paths coincide""" 
     #Takes into account width of robot
     theta_destination_1 = -np.pi/2-np.arctan2(current_position[1]-destination[1],current_position[0]-destination[0])
-        if theta_destination_1 <=0:
-            theta_destination_1 += 2*np.pi
+    if theta_destination_1 <=0:
+        theta_destination_1 += 2*np.pi
     
     theta_destination_2 = -np.pi/2-np.arctan2(other_position[1]-other_destination[1],other_position[0]-other_destination[0])
-        if theta_destination_2 <=0:
-            theta_destination_2 += 2*np.pi        
+    if theta_destination_2 <=0:
+        theta_destination_2 += 2*np.pi        
     
     info_1 = wheel_travel_info(current_position, destination, theta_destination_1)
     info_2 = wheel_travel_info(current_position, destination, theta_destination_2)
@@ -607,9 +607,15 @@ while robot.step(TIME_STEP) != -1:
 
     angle = convert_compass_angle(compass.getValues())
  
-    destination = [0.3, -0.2]
+    destination = [0.3, -0.4]
+    
+    theta_destination = -np.pi/2-np.arctan2(coord2d[1]-destination[1],coord2d[0]-destination[0])
+    if theta_destination <=0:
+        theta_destination += 2*np.pi
     
     #check if function works
-    if intersect_endzone(current_position, destination, theta_destination):
+    if intersect_endzone(coord2d, destination, theta_destination):
         print('success')
         sys.exit()
+        
+    print('not right')
