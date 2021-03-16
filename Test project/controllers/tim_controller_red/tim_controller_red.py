@@ -2,6 +2,7 @@ from controller import Robot,GPS,Compass,Receiver,Emitter
 import numpy as np
 import struct
 import time
+import sys
 
 """
 Setup
@@ -16,18 +17,23 @@ start = robot.getTime()
 blockid = 0
 blocks = []#format: [coord1,coord2,colour,sorted?]
 other_robot_coords = [0,0.4]
+other_destination = None
 current_block = None
 block_hitbox_radius = 0.1 #0.056
 robot_hitbox_radius = None
-robot_status = "initial scan"
+robot_status = "scan"
 destination = [0.5,0.5]
 MAX_SPEED = 3.14
 sensorX = 0.115
 sensorZ = 0 #redundant
 navigation_status = 0
-WHEEL_RADIUS = 5.08
-ROBOT_WIDTH = 18 + 2*WHEEL_RADIUS
+WHEEL_RADIUS = 0.0508
+ROBOT_WIDTH = 0.18 + 2*WHEEL_RADIUS
 TURN_RADIUS = (ROBOT_WIDTH-WHEEL_RADIUS+1.11)/2
+moveWaypoints = [[-0.9, 0.7], [-0.9, -0.7], [0.9, -0.7], \
+                    [0.9, 0.7], [0, 0], [0, -0.7], [0, 0.7]]
+scanWaypoints = [[0.9, -0.7], [0.9, 0.7], [-0.9, 0.7], [-0.9, -0.7]]
+blocksCollected = 0
 
 TIME_STEP = 64
 
@@ -207,6 +213,8 @@ def message_encode(message_type,content):
         message = struct.pack(format,5,0,0,content[0])#Null, Null, ID
     elif message_type == "MyBlock":
         message = struct.pack(format,6,0,0,content[0])#Null, Null, ID
+    elif message_type == "IAmGoingTo":
+        message = struct.pack(format,7,content[0],content[1], 0)#coord1, coord2, Null   
     return message
 
     
@@ -225,6 +233,8 @@ def message_decode(message):
         return ("BlockGreen", [data[3]])
     elif data[0] ==6:
         return ("MyBlock", [data[3]])
+    elif data[0] ==7:
+        return ("IAmGoingTo", [data[1],data[2]])
     #Might need a block removed
 
 
@@ -248,6 +258,8 @@ def sort_all_messages():#Might not need
                     #item[3] == "Unsorted"
             blocks[data[0]][3] = "Bot2Chope"
             #Also unchope other blocks
+        elif message_type == "IAmGoingTo":
+            other_destination = [data[0],data[1]]
         receiver.nextPacket()
         #print(blocks)
 
@@ -283,9 +295,13 @@ def anomalies(sensorLong,sensorShort):
         return False
 
 
-def wheel_travel_info(position, destination, angle):
+def wheel_travel_info(position, destination):
     """Returns a list of coordinates of the edge of the wheels of the robot
     and their respective destinations"""        
+    angle = -np.pi/2-np.arctan2(position[1]-destination[1],position[0]-destination[0])
+    if angle <=0:
+        angle += 2*np.pi
+    
     r = ROBOT_WIDTH/2
     return [[position[0] - r*np.sin(angle), position[1] + r*np.cos(angle)], \
         [position[0] + r*np.sin(angle), position[1] - r*np.cos(angle)], \
@@ -309,14 +325,14 @@ def lines_intersect(pos1, pos2, pos3, pos4):
     else:
         return False
      
-def intersect_endzone(current_position, destination, theta_destination):
+def intersect_endzone(current_position, destination):
     """Return True if robot will pass through endzones"""
     #Corners of endzones
     endzone_red = [[0.2, 0.2], [0.2, 0.6], [-0.2, 0.2], [-0.2, 0.6]]
     endzone_green = [[0.2, -0.2], [0.2, -0.6], [-0.2, -0.2], [-0.2, -0.6]]
     
     #Takes into account width of robot
-    info = wheel_travel_info(current_position, destination, theta_destination)
+    info = wheel_travel_info(current_position, destination)
     
     for i in range(2):
         if lines_intersect(info[i], info[i+2], endzone_red[0], endzone_red[1]) \
@@ -336,16 +352,8 @@ def intersect_endzone(current_position, destination, theta_destination):
 def intersect_other_robot_path(current_position, destination, other_position, other_destination):
     """Returns True if robots paths coincide""" 
     #Takes into account width of robot
-    theta_destination_1 = -np.pi/2-np.arctan2(current_position[1]-destination[1],current_position[0]-destination[0])
-        if theta_destination_1 <=0:
-            theta_destination_1 += 2*np.pi
-    
-    theta_destination_2 = -np.pi/2-np.arctan2(other_position[1]-other_destination[1],other_position[0]-other_destination[0])
-        if theta_destination_2 <=0:
-            theta_destination_2 += 2*np.pi        
-    
-    info_1 = wheel_travel_info(current_position, destination, theta_destination_1)
-    info_2 = wheel_travel_info(current_position, destination, theta_destination_2)
+    info_1 = wheel_travel_info(current_position, destination)
+    info_2 = wheel_travel_info(current_position, destination)
     
     for i in range(2):
         for j in range(2):
@@ -589,14 +597,14 @@ def drive_straight(leftSpeed,rightSpeed,t):
         robot.step(1)
        
 def endThisSuffering():
-    if robot.getTime() - start > 290:
+    if robot.getTime() - start > 293:
         move_to_coordinate(home, 0.01)
         print("I'm back home!")
         sys.exit()
 
     
-if robot_colour == "red":
-            passive_wait(2)
+# if robot_colour == "red":
+            # passive_wait(2)
 
 while robot.step(TIME_STEP) != -1:
     endThisSuffering()
@@ -605,9 +613,7 @@ while robot.step(TIME_STEP) != -1:
     coord2d = [coord3d[0],coord3d[2]]
 
     angle = convert_compass_angle(compass.getValues())
- 
 
-    
     if robot_status == "initial scan":
         leftSpeed = -0.4
         rightSpeed = 0.4
@@ -619,8 +625,7 @@ while robot.step(TIME_STEP) != -1:
         sort_all_messages()
         if robot_colour == "green" or robot.getTime()-start>=1:
             scan(sensordistLong,walldistLong)
-        
-        
+ 
         if robot_colour == "green":
             if angle > 3*np.pi/2 and angle < 3*np.pi/2 + 0.1 and robot.getTime() - start >= 1:
                 robot_status = "logic"
@@ -638,9 +643,7 @@ while robot.step(TIME_STEP) != -1:
             sensordistLong = 0.8 + sensorX
         if anomalies(sensordistLong,sensordistShort):
             scan(sensordistLong,sensordistShort)"""
-
-            
-            
+         
     if robot_status == "logic":
         #if robot_colour == "red":
             #passive_wait(0.2)
@@ -663,12 +666,44 @@ while robot.step(TIME_STEP) != -1:
                     blockid = id
 
                 
-        if shortest_distance == 10:
+        if shortest_distance == 10 and blocksCollected == 4:
             robot_status = "end" 
+        elif shortest_distance == 10 and blocksCollected != 4:
+            #Haven't discovered all the blocks, going to alternative location to scan for more blocks
+            robot_status = "alt_scan"
+        
         else:       
             destination = [blocks[blockid][0],blocks[blockid][1],"block"]
+            #Check if destination will coincide with end Zones
+            #If robot originally in endzone proceed normally
+            if abs(coord2d[0]) <= 0.2 and (abs(coord2d[1] <= 0.6) and abs(coord2d[1] >= 0.2)):
+                #Robot position is in endzone, proceed normally
+                pass
+            
+            else: 
+                if intersect_endzone(coord2d, destination):
+                    #endzone will be breached
+                    #Change destination (need to figure out how)
+                    
+                    #Temporarily pass first
+                    pass
+            
+            #Check if paths of bots will intersect
+            #If intersect, let green go first until paths do not intersect
+            if intersect_other_robot_path(coord2d, destination, other_robot_coords, other_destination):
+                #REMEMBER TO CHANGE THE VARIABLES
+                if robot_colour == 'red':
+                    passive_wait(0.2)
+                    robot.step(1)
+                else:
+                    pass
+                    
+                     
             message = message_encode("MyBlock",[blockid])
             emitter.send(message)
+            message = message_encode("IAmGoingTo", destination)
+            emitter.send(message)
+            #Need to send robot position to another bot
             print("Going to block: " + str(blockid))
             robot_status = "navigating" 
                 
@@ -686,32 +721,8 @@ while robot.step(TIME_STEP) != -1:
         print("Navigating")
         
         short_scan()
-        
-        
-        
-
         robot_status = "logic"
       
-    
-    """if robot_status == "checking": 
-    #Gets close to block and then checks the colour
-    #Does not use previously scanned coordinates
-        check block()
-        
-    if robot_status = "Idle":
-    #selection logic to figure out what to do - also chooses block
-    
-    """
- 
-    """ls_red_value = ls_red.getValue()
-    ls_green_value = ls_green.getValue()
-    
-    if ls_red_value > 0:
-        print("red")
-        
-    if ls_green_value > 0:
-        print("green")  """  
-        
         
     if robot_status == "end":
         move_to_coordinate(home,0.01)

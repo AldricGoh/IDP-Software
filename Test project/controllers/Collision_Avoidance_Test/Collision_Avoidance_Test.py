@@ -284,9 +284,13 @@ def anomalies(sensorLong,sensorShort):
         return False
 
 
-def wheel_travel_info(position, destination, angle):
+def wheel_travel_info(position, destination):
     """Returns a list of coordinates of the edge of the wheels of the robot
     and their respective destinations"""        
+    angle = -np.pi/2-np.arctan2(position[1]-destination[1],position[0]-destination[0])
+    if angle <=0:
+        angle += 2*np.pi
+    
     r = ROBOT_WIDTH/2
     return [[position[0] - r*np.sin(angle), position[1] + r*np.cos(angle)], \
         [position[0] + r*np.sin(angle), position[1] - r*np.cos(angle)], \
@@ -319,7 +323,7 @@ def intersect_endzone(current_position, destination, theta_destination):
     endzone_green = [[0.2, -0.2], [0.2, -0.6], [-0.2, -0.2], [-0.2, -0.6]]
     
     #Takes into account width of robot
-    info = wheel_travel_info(current_position, destination, theta_destination)
+    info = wheel_travel_info(current_position, destination)
     
     for i in range(2):
         if lines_intersect(info[i], info[i+2], endzone_red[0], endzone_red[1]) \
