@@ -30,8 +30,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.6161285752063749 -0.7323206929137387 -0.2899861747471838 1.1453927762891891
-  position -2.7320365201836467 3.486597452555706 2.9382192378758702
+  orientation -0.52189362497018 -0.7486281130822208 -0.4088801688984668 1.618345342341276
+  position -2.040679498040437 2.652222229712003 0.588640978027741
 }
 Background {
   skyColor [
@@ -116,44 +116,9 @@ DEF WALL_4 Solid {
 TexturedBackgroundLight {
   texture "empty_office"
 }
-target {
-  translation 0.7 0.03 0
-  colour 0 1 0
-  name "target(2)"
-}
-target {
-  translation -0.7 0.03 0
-  colour 0 1 0
-  name "target(1)"
-}
-target {
-  translation 0.7 0.03 0.65
-  colour 0 1 0
-  name "target(4)"
-}
-target {
-  translation -0.95 0.03 0.96
-  colour 0 1 0
-  name "target(8)"
-}
-target {
-  translation -0.78 0.03 0.41
-  name "target(5)"
-}
-target {
-  translation -0.38 0.03 0.74
-  name "target(6)"
-}
-target {
-  translation -0.79 0.03 -0.85
-  name "target(3)"
-}
-target {
-  translation 0.23 0.03 -0.97
-  name "target(7)"
-}
 Robot {
-  translation 0 0.06 0.4
+  translation -0.30536 0.06 0.00464087
+  rotation 0 1 0 2.0944
   children [
     Receiver {
       type "infra-red"
@@ -526,11 +491,11 @@ Robot {
   physics Physics {
     density 700
   }
-  controller ""
+  controller "collision_avoidance_test_red"
 }
 Robot {
-  translation -0.65 0.06 0.95
-  rotation 0 1 0 3.14159
+  translation -0.704348 0.06 -0.352839
+  rotation 0 1 0 1.83259
   children [
     Receiver {
       type "infra-red"

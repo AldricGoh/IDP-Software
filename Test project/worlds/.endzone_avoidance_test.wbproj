@@ -5,5 +5,5 @@ sceneTreePerspectives: 000000ff0000000100000002000000c0000000fa01000000020100000
 maximizedDockId: -1
 centralWidgetVisible: 1
 orthographicViewHeight: 1
-textFiles: 3 "controllers/Tim_controller/Tim_controller.py" "controllers/tim_controller_red/tim_controller_red.py" "controllers/Collision_Avoidance_Test/Collision_Avoidance_Test.py" "controllers/endzone_avoidance/endzone_avoidance.py"
+textFiles: 2 "controllers/Tim_controller/Tim_controller.py" "controllers/tim_controller_red/tim_controller_red.py" "controllers/Collision_Avoidance_Test/Collision_Avoidance_Test.py" "controllers/endzone_avoidance/endzone_avoidance.py"
 consoles: Console:All:All

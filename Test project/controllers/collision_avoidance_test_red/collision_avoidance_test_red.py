@@ -8,7 +8,7 @@ import sys
 Setup
 """
 robot = Robot()
-robot_colour = "green"
+robot_colour = "red"
 home = [0,-0.4]
 if robot_colour =="red":
     home = [0,0.4]
@@ -62,10 +62,10 @@ ls_green.enable(TIME_STEP)
 
 #Enable GPS
 gps = robot.getDevice("gps")
-gps.enable(8)#Sampling period
+gps.enable(16)#Sampling period
 #Enable compass
 compass = robot.getDevice("compass")
-compass.enable(8)#Sampling period
+compass.enable(16)#Sampling period
 #Emitter Receiver
 emitter = robot.getDevice("emitter")
 receiver = robot.getDevice("receiver")
@@ -658,7 +658,7 @@ def endThisSuffering():
         sys.exit()
 
 if robot_colour == 'red':    
-    destination = [-0.91, 0, 01]
+    destination = [-0.91, 0.01]
 elif robot_colour == 'green':
     destination = [-0.71, 0.71]
 

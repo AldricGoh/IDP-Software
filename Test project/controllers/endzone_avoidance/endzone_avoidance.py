@@ -30,10 +30,12 @@ navigation_status = 0
 WHEEL_RADIUS = 0.0508
 ROBOT_WIDTH = 0.18 + 2*WHEEL_RADIUS
 TURN_RADIUS = (ROBOT_WIDTH-WHEEL_RADIUS+1.11)/2
-moveWaypoints = [[-0.9, 0.7], [-0.9, -0.7], [0.9, -0.7], \
-                    [0.9, 0.7], [0, 0], [0, -0.7], [0, 0.7]]
-scanWaypoints = [[-0.9, 0.7], [-0.9, -0.7], [0.9, -0.7], [0.9, 0.7]]
+moveWaypoints = [[-0.7, 0.9], [-0.7, -0.9], [0.7, -0.9], \
+                    [0.7, 0.9], [0, 0], [-0.7, 0], [0.7, 0], \
+                    [0, -0.9], [0, 0.9]]
+scanWaypoints = [[0.7, -0.9], [-0.7, -0.9], [-0.7, 0.9], [0.7, 0.9]]
 blocksCollected = 0
+previousWaypoints = []
 
 TIME_STEP = 64
 
@@ -670,10 +672,10 @@ while robot.step(TIME_STEP) != -1:
     
     if robot_status == 'scan':
         destination = [0, 0.7]
-
         if abs(coord2d[0]) <= 0.2 and (abs(coord2d[1]) <= 0.6 and abs(coord2d[1] >= 0.2)):
             #Robot position is in endzone, proceed normally
             move_to_coordinate(destination, 0.1)
+            sys.exit()
                 
         else: 
             if intersect_endzone(coord2d, destination):
@@ -684,28 +686,29 @@ while robot.step(TIME_STEP) != -1:
                 nearest_waypoint_distance = dist(coord2d[0],coord2d[1],moveWaypoints[0][0],moveWaypoints[0][1])   
                 destination = moveWaypoints[0]
                 for waypoint in moveWaypoints:
-                    if nearest_waypoint_distance > dist(coord2d[0],coord2d[1],waypoint[0],waypoint[1]):
-                        if destination != waypoint:
-                            destination = waypoint
-                            nearest_waypoint_distance = dist(coord2d[0],coord2d[1],waypoint[0],waypoint[1])
-                            print(coord2d, destination, dist(coord2d[0],coord2d[1],waypoint[0],waypoint[1]))
-                            
-                        else:
-                            pass  
-                                 
+                    if nearest_waypoint_distance > dist(coord2d[0],coord2d[1],waypoint[0],waypoint[1]) \
+                        and destination != waypoint and waypoint not in previousWaypoints \
+                        and dist(coord2d[0], coord2d[1], waypoint[0], waypoint[1]) > 0.01:
+                        destination = waypoint
+                        nearest_waypoint_distance = dist(coord2d[0],coord2d[1],waypoint[0],waypoint[1])
+                                          
+                    else:
+                        pass  
+                
+                previousWaypoints.append(destination)                 
                 robot_status = "navigation_move"
                 pass
-         
+             
+            else:
+                print('expected output')
+                sys.exit()
+                
   
     if robot_status == "navigation_move":
-        print(destination)
-        move_to_coordinate(destination, 0)        
-        robot_status = 'exit'
+        move_to_coordinate(destination, 0.01)        
+        robot_status = 'scan'
         pass
-        
-    if robot_status == 'exit':
-        print(coord2d)
-        sys.exit()
+
 
         
         
