@@ -543,14 +543,15 @@ def short_scan():
                 blocks[blockid][3] = "ignore"
                 message = message_encode("BlockRed",[blockid])
                 emitter.send(message)
-                return 
+                return False
             else:
                 message = message_encode("BlockRed",[blockid])
                 emitter.send(message)
                 blocks[blockid][2] = "red"
-                blocksCollected += 1
+                
                 #blocks[blockid][3] = "Sorted"
                 break
+        
         if ls_green_value > 0:
             if robot_colour == "red":
                 print("Oh no a green block")
@@ -558,12 +559,12 @@ def short_scan():
                 emitter.send(message)
                 blocks[blockid][2] = "green"
                 blocks[blockid][3] = "ignore"
-                return 
+                return False
             else:
                 message = message_encode("BlockGreen",[blockid])
                 emitter.send(message)
                 blocks[blockid][2] = "green"
-                blocksCollected += 1
+                
                 #blocks[blockid][3] = "Sorted"
                 break
             
@@ -592,7 +593,7 @@ def short_scan():
     drive_straight(-0.5,-0.5,3)
     closeDoor()
     blocks[blockid][3] = "Sorted"
-    return 
+    return True
 
 def drive_straight(leftSpeed,rightSpeed,t):
     start = robot.getTime()
@@ -654,7 +655,6 @@ while robot.step(TIME_STEP) != -1:
             #passive_wait(0.2)
         print("Logic")
         shortest_distance = 10
-        robot_status = "end"
         sort_all_messages()
         print(blocks)
         if robot_colour == "red":
@@ -769,7 +769,10 @@ while robot.step(TIME_STEP) != -1:
     
     if robot_status == "navigating":
         print("Navigating")
-        short_scan()
+        if short_scan():
+            blocksCollected += 1
+        else:
+            pass 
         previousWaypoints.clear()
         robot_status = "logic"
       
