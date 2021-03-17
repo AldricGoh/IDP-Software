@@ -9,10 +9,12 @@ Setup
 """
 robot_colour = "red"
 home = [0,-0.4]
+scanWaypoints = [[0.7, -0.9], [-0.7, -0.9], [-0.7, 0.9], [0.7, 0.9]]
 if robot_colour =="red":
     home = [0,0.4]
+    scanWaypoints = [[0.9, -0.7], [0.9, 0.7], [-0.9, 0.7], [-0.9, -0.7]]
 
-
+blocksCollected = 0
 blockid = 0
 blocks = []#format: [coord1,coord2,colour,sorted?]
 other_robot_coords = [0,0.4]
@@ -441,7 +443,7 @@ def short_scan():
                 emitter.send(message)
                 blocks[blockid][3] = "ignore"
                 blocks[blockid][2] = "red"
-            return  
+            return False
         
         
         if seen_yet == 0:
@@ -483,7 +485,7 @@ def short_scan():
                 blocks[blockid][3] = "ignore"
                 message = message_encode("BlockRed",[blockid])
                 emitter.send(message)
-                return 
+                return False
             else:
                 print("This block is red and I am red, praise be")
                 message = message_encode("BlockRed",[blockid])
@@ -498,7 +500,7 @@ def short_scan():
                 emitter.send(message)
                 blocks[blockid][2] = "green"
                 blocks[blockid][3] = "ignore"
-                return 
+                return False
             else:
                 print("This block is green and I am green, LETS GO")
                 message = message_encode("BlockGreen",[blockid])
@@ -532,7 +534,7 @@ def short_scan():
     closeDoor()
     blocks[blockid][3] = "Sorted"
     print("The block has been sorted")
-    return 
+    return True
 
 def drive_straight(leftSpeed,rightSpeed,t):
     start = robot.getTime()
@@ -607,8 +609,16 @@ while robot.step(TIME_STEP) != -1:
                     blockid = id
 
                 
-        if shortest_distance == 10:
+        if shortest_distance == 10 and (blocksCollected == 4 or len(scanWaypoints) == 0):
             robot_status = "end" 
+        
+        elif shortest_distance == 10 and blocksCollected != 4:
+            #Haven't discovered all the blocks, going to alternative location to scan for more blocks
+            destination = scanWaypoints[0]
+            scanWaypoints.pop(0)
+            move_to_coordinate(destination, 0.01)
+            robot_status = 'initial scan'
+            
         else:       
             destination = [blocks[blockid][0],blocks[blockid][1],"block"]
             message = message_encode("MyBlock",[blockid])
@@ -620,20 +630,14 @@ while robot.step(TIME_STEP) != -1:
 
             
         #Either search for more or die
-       
-        
-
-            
-        
+ 
     
     if robot_status == "navigating":
-        #print("Navigating")
-        print(blocks)
-        short_scan()
-        
-        
-        
-
+        print("Navigating")
+        if short_scan():
+            blocksCollected += 1
+        else:
+            pass 
         robot_status = "logic"
       
     
