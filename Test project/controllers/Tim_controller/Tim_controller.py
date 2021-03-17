@@ -15,6 +15,7 @@ if robot_colour =="red":
     home = [0,0.4]
     scanWaypoints = [[0.9, -0.7], [0.9, 0.7], [-0.9, 0.7], [-0.9, -0.7]]
 
+blocksCollected = 0
 start = robot.getTime()
 blockid = 0
 blocks = []#format: [coord1,coord2,colour,sorted?]
@@ -273,10 +274,10 @@ def scan(sensordist,walldist):
         object_position = get_object_position(coord2d,angle,sensordist)
         status = what_is_it(object_position,1)
         if status == "NewBox":
-            print("New block")
+            #print("New block")
             
             blocks.append([object_position[0],object_position[1],"Unknown","Unsorted"])
-            print(blocks)
+            #print(blocks)
             message = message_encode("NewBlock",[object_position[0],object_position[1]])
             emitter.send(message)
  
@@ -637,9 +638,9 @@ while robot.step(TIME_STEP) != -1:
                 leftSpeed = 0
                 rightSpeed = 0
                 setSpeed(leftSpeed,rightSpeed)
-                passive_wait(10)
+
         else:
-            if angle > 3*np.pi/2 and angle < 3*np.pi/2 + 0.1 and robot.getTime() - start >= 15:
+            if angle > 3*np.pi/2 and angle < 3*np.pi/2 + 0.1 and robot.getTime() - start >= 1:
                 robot_status = "logic"
     """else:
         sensordistLong = sensor_to_dist(ds_right.getValue(),sensorX,"long")
@@ -654,9 +655,9 @@ while robot.step(TIME_STEP) != -1:
             #passive_wait(0.2)
         print("Logic")
         shortest_distance = 10
-        robot_status = "end"
+        #robot_status = "end"
         sort_all_messages()
-        print(blocks)
+        #print(blocks)
         if robot_colour == "red":
             passive_wait(0.2)
         for id in range(len(blocks)):
@@ -669,17 +670,22 @@ while robot.step(TIME_STEP) != -1:
                     shortest_distance = distance
                     
                     blockid = id
+        print("Green")            
+        print(shortest_distance)
 
                 
         if shortest_distance == 10 and blocksCollected == 4:
             #All blocks collected, going back home
+            print("End phase")
             robot_status = "end" 
         elif shortest_distance == 10 and blocksCollected != 4:
+            print("Scan phase")
             #Haven't discovered all the blocks, going to alternative location to scan for more blocks
             destination = scanWaypoints[0]
             #definitely will not intersect endzone
             if intersect_other_robot_path(coord2d, destination, other_robot_coords, other_destination):
             #REMEMBER TO CHANGE THE VARIABLES
+                print("Will be intersecting other bot")
                 if robot_colour == 'red':
                     setSpeed(0,0) 
                     message = message_encode("IAmGoingTo", destination)
@@ -704,17 +710,18 @@ while robot.step(TIME_STEP) != -1:
                 emitter.send(message)
               
         else:       
+            print("Block phase")
             destination = [blocks[blockid][0],blocks[blockid][1],"block"]
             #Check if destination will coincide with end Zones
             if abs(coord2d[0]) <= 0.2 and (abs(coord2d[1]) <= 0.6 and abs(coord2d[1] >= 0.2)):
                 #Robot position is in endzone, proceed normally
                 pass
             
-            elif intersect_endzone(coord2d, destination):
+            if intersect_endzone(coord2d, destination):
                 #endzone will be breached
                 #Change destination (need to figure out how)
                 #Choose nearest waypoint (moveWaypoints)
-
+                print("Intersecting End Zone")
                 nearest_waypoint_distance = dist(coord2d[0],coord2d[1],moveWaypoints[0][0],moveWaypoints[0][1])   
                 destination = moveWaypoints[0]
                 for waypoint in moveWaypoints:
@@ -726,10 +733,11 @@ while robot.step(TIME_STEP) != -1:
                                           
                     else:
                         pass  
-                pass          
+                robot_status = "navigation_move"          
             
             elif intersect_other_robot_path(coord2d, destination, other_robot_coords, other_destination):
             #REMEMBER TO CHANGE THE VARIABLES
+                print("Intersecting other robot")
                 if robot_colour == 'red':
                     theta_destination = -np.pi/2-np.arctan2(coord2d[1]-destination[1],coord2d[0]-destination[0])
                     if theta_destination <=0:
@@ -743,21 +751,21 @@ while robot.step(TIME_STEP) != -1:
                     message = message_encode("IAmHere", coord2d)
                     emitter.send(message) 
                     
-                else:
-                    robot_status = 'navigating'
-                    message = message_encode("MyBlock",[blockid])
-                    emitter.send(message)
-                    message = message_encode("IAmGoingTo", destination)
-                    emitter.send(message)
-                    message = message_encode("IAmHere", coord2d)
-                    emitter.send(message) 
-                    #for green bot just proceed as usual
-            
-            else: 
+            else:
+                robot_status = 'navigating'
+                message = message_encode("MyBlock",[blockid])
+                emitter.send(message)
                 message = message_encode("IAmGoingTo", destination)
                 emitter.send(message)
                 message = message_encode("IAmHere", coord2d)
                 emitter.send(message) 
+                #for green bot just proceed as usual
+            
+            
+            message = message_encode("IAmGoingTo", destination)
+            emitter.send(message)
+            message = message_encode("IAmHere", coord2d)
+            emitter.send(message) 
     
     
     if robot_status == "navigating":
