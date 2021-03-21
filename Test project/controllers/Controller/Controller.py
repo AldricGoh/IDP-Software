@@ -14,7 +14,7 @@ import sys
 Setup
 """
 #Change robot colour variable for the two different robots, either red or green
-
+#This affects several other functions further down so that the 2 controllers are identical except for this one line
 robot_colour = "green"
 home = [0,-0.4]
 scanWaypoints = [[0.7, -0.9], [-0.7, -0.9], [-0.7, 0.9], [0.7, 0.9]]
@@ -23,13 +23,23 @@ if robot_colour =="red":
     home = [0,0.4]
     scanWaypoints = [[0.9, -0.7], [0.9, 0.7], [-0.9, 0.7], [-0.9, -0.7]]
 
+
+
+#Blocks are stored in a list with the relevant data indexed as below
+#Both robots share the same list
 blocksCollected = 0
 blockid = 0
 blocks = []#format: [coord1,coord2,colour,sorted?]
+
+
 other_robot_coords = [0,0.4]
 current_block = None
+
+#Hitblock radii set up so that a block will not be duplicated in the block list
 block_hitbox_radius = 0.2 #0.056
 robot_hitbox_radius = None
+
+
 robot_status = "initial scan"
 destination = [0.5,0.5]
 MAX_SPEED = 3.14
@@ -88,7 +98,7 @@ receiver.enable(100)
 
 timestep = int(robot.getBasicTimeStep())
 
-def moveToPosition(position):
+def moveToPosition(position):#This function was unused
     """moves wheels to position (in rads)"""
     left_wheel.setPosition(position)
     right_wheel.setPosition(position)
@@ -110,7 +120,7 @@ def setSpeed(speedL,speedR):
     left_wheel.setVelocity(speedL*MAX_SPEED)
     right_wheel.setVelocity(speedR*MAX_SPEED)
 
-def convert_compass_angle(compass_values):
+def convert_compass_angle(compass_values):#Converts the 3 coordinate compass reading into an angle that can be used in other calculations
     rad = -np.arctan2(compass_values[0],compass_values[2])
     if rad <=0:
         rad += 2*np.pi
@@ -118,17 +128,24 @@ def convert_compass_angle(compass_values):
 
 def dist_to_wall(angle,position,sensor_type):
     #Finds what the distance sensor should be reading
+
+    #Each sensor has a maximum reading, this prevents the program expecting the sensors from detecting anything higher
     if sensor_type == "short":
         cap = 0.8+sensorX
     else:
         cap = 1.5+sensorX
+
+        
     x = position[0]
     z = position[1]
     #print("X: " + str(x) + " Z: " + str(z) + " Angle: " + str(angle))
+    #Calculates the distance of the robot to each wall
     wallN = abs((1.2-0.01 - x) / np.sin(angle))#0.01 terms as wall has a thickness
     wallS = abs((-1.2+0.01 - x) / np.sin(angle))
     wallW = abs((-1.2+0.01 - z) / np.cos(angle))
     wallE = abs((+1.2-0.01 - z) / np.cos(angle))
+
+    #Selects which two walls the robot is facing so that the two it is facing away from can be ignored
     if (angle>=0 and angle <= np.pi/2):
         return min([wallN,wallE,cap])
     elif (angle>=np.pi/2 and angle <= np.pi):
@@ -148,9 +165,8 @@ def get_object_position(position,angle,sensordist):
         
 def sensor_to_dist(sensor_value,bot_length,sensor_type):
     #Uses sensitivity curve to calculate actual distance, factors in position of sensor
-    #return (1000-sensor_value)/666.7 + bot_length
     
-    #Linear interpolation bewteen 2 points
+    #Linear interpolation between 2 points
     #print("Value used: " +str(sensor_value))
     if sensor_type == "long":
         lookup = [0.15,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5]
@@ -168,6 +184,7 @@ def sensor_to_dist(sensor_value,bot_length,sensor_type):
         return (sensor_value - lookup2[index]) / (lookup2[index+1] - lookup2[index]) * (lookup[index+1] - lookup[index]) + lookup[index] + bot_length
     
 def endThisSuffering():
+    #This function is inserted in most looping parts of the code so that if the robot gets stuck, it will still return to the start after 280 seconds and then stop
     if robot.getTime() - start > 280:
         move_to_coordinate(home, 0.01)
         print("I'm back home!")
@@ -175,7 +192,7 @@ def endThisSuffering():
     
     
 def what_is_it(position,other_robot_position):
-    #Determines if the box is interesting
+    #Determines if the box is interesting by comparing it with the other blocks that have been found
     x = position[0]
     z = position[1]  
     for block in blocks:
@@ -193,17 +210,21 @@ def what_is_it(position,other_robot_position):
         
         
 def hitboxcollision(x1,z1,x2,z2,r2):
+    #Returns if one coordinae lies in the range of another
     if (x2-x1)**2+(z2-z1)**2 <= r2**2:
         return True
     else:
         return False
         
 def dist(x1,z1,x2,z2):
+    #Returns the distance between 2 points, similar to previous one
     return ((x2-x1)**2+(z2-z1)**2)*0.5
 
 
     
 def passive_wait(time):
+    #Used to make the robot do an instruction for a given amount of time
+    #Useful for hard coding pickup and drop off
     start_time = robot.getTime()
     while start_time + time > robot.getTime():
         robot.step(1)
@@ -249,7 +270,8 @@ def message_decode(message):
     # elif data[0] ==7:
     #     return ("IAmGoingTo", [data[1],data[2]])
 
-def sort_all_messages():#Might not need
+def sort_all_messages():
+    #Sorts out all the messages and does the required actions for each
     while receiver.getQueueLength() > 0:
         message = receiver.getData()
         message_type,data = message_decode(message)
@@ -276,6 +298,7 @@ def sort_all_messages():#Might not need
         #print(blocks)
 
 def scan(sensordist,walldist):
+    #Handles the logic behind if a block has been found or not
     if sensordist < 1.55 and sensordist<walldist * 0.9:#Need to tune this value so no false positives
         #print("Object found at " + str(angle) + " Sensor dist: "+str(sensordist)+ " Wall dist: " + str(walldist))
         object_position = get_object_position(coord2d,angle,sensordist)
@@ -292,7 +315,8 @@ def scan(sensordist,walldist):
             pass
             
 def anomalies(sensorLong,sensorShort): 
-    
+    #A second method to determine if a block is present
+    #This does so by comparing the values of a sensor at block level and a sensor above the blocks
     #print(min([sensorLong,0.8 + sensorX]))
     #print(sensorShort)
     if abs(min([sensorLong,0.8 + sensorX]) - sensorShort) > 0.1:
@@ -376,8 +400,11 @@ def intersect_other_robot_path(current_position, destination, other_position, ot
     return False
 
 """End of chunk of unutilised code"""                 
-        
+
+
+
 def move_to_coordinate(destination,early_stop):
+    #Moves a robot to a fixed coordinate, has an ealry stop so that the robot doesn't try to get absolute precision
     while True:
         coord3d = gps.getValues()
         coord2d = [coord3d[0],coord3d[2]]
@@ -432,6 +459,8 @@ def move_to_coordinate(destination,early_stop):
     
 def move_to_angle(target):
     #print("Moving to angle")
+    #Rotates the robot until it is facing a certain angle
+    #Speed decreases as the robot gets clsoerr to the angle so that it doesn't overshoot
     while True:
         leftSpeed = 0
         rightSpeed = 0
@@ -468,6 +497,7 @@ def move_to_angle(target):
     
 
 def short_scan():
+    #This function encompasses the point at which the robot decides it is agong to a specific block all the way to carrying it back to the end zone
     move_to_coordinate(destination,0.05)
     angle = convert_compass_angle(compass.getValues())
     lowest = 100
@@ -510,6 +540,7 @@ def short_scan():
     setSpeed(leftSpeed,rightSpeed)  
     seen_yet = 0
     loop_preventer = robot.getTime()
+    #This part finds the centre of the block by seeing where the two edges are and going to the average angle
     while True:
         endThisSuffering()
         current_angle = convert_compass_angle(compass.getValues())
@@ -559,7 +590,9 @@ def short_scan():
     #print(convert_compass_angle(compass.getValues()))
     leftSpeed = -0.3
     rightSpeed = -0.3
-    setSpeed(leftSpeed,rightSpeed)  
+    setSpeed(leftSpeed,rightSpeed)
+    #Reverses until it sees the colour of the block
+    #Communicates with the robot and takes a course of action based on what the robots colour is
     while True:
         endThisSuffering()
         ls_red_value = ls_red.getValue()
@@ -601,6 +634,8 @@ def short_scan():
     if target_angle >= 2 *np.pi:
         target_angle -= 2*np.pi
     move_to_angle(target_angle)
+
+    #Hardcoded to pick up the block
     openDoor()
     #start = time.time()
     
@@ -624,6 +659,7 @@ def short_scan():
     return True
 
 def drive_straight(leftSpeed,rightSpeed,t):
+    #Function that makes the robot drive for a fixed period of time
     start = robot.getTime()
     while robot.getTime()-start <t:
         setSpeed(leftSpeed,rightSpeed)  
@@ -683,7 +719,8 @@ def intersect_protocol(destination):
     return True
     
 if robot_colour == "red":
-            passive_wait(8)
+    #Pauses the red robot so it doesn't conflict with green's scanning
+    passive_wait(8)
 
 while robot.step(TIME_STEP) != -1:
     endThisSuffering()
@@ -694,7 +731,7 @@ while robot.step(TIME_STEP) != -1:
     angle = convert_compass_angle(compass.getValues())
  
 
-    
+    #Initial scan, robot does a 360 while finding blocks
     if robot_status == "initial scan":
         leftSpeed = -0.4
         rightSpeed = 0.4
@@ -727,7 +764,7 @@ while robot.step(TIME_STEP) != -1:
             scan(sensordistLong,sensordistShort)"""
 
             
-            
+    #Logic selects the closest potential block and directs the robot towards it
     if robot_status == "logic":
         shortest_distance = 10
         robot_status = "end"
@@ -798,7 +835,7 @@ while robot.step(TIME_STEP) != -1:
     if ls_green_value > 0:
         print("green")  """  
         
-        
+    #Ends the program   
     if robot_status == "end":
         move_to_coordinate(home,0.01)
         leftSpeed = 0
